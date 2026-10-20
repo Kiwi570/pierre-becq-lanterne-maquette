@@ -1,0 +1,53 @@
+/* Decors communs : marqueterie a cubes, caisse de transport qui s'assemble. */
+import PB from './base.js';
+
+const { gsap, calme } = PB;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+/* ---------------- 6. marqueterie ---------------- */
+export function construireMarqueteries() {
+  const tons = ['#c89a5e', '#8a5a2e', '#4a2c16'];
+  const s = 13; const hx = s * Math.sqrt(3);
+  const cubes = [];
+  for (let r = -1; r < 6; r++) for (let q = -1; q < 6; q++) {
+    const cx = q * hx + (r % 2 ? hx / 2 : 0); const cy = r * s * 1.5;
+    if (cx < -10 || cx > 130 || cy < -10 || cy > 130) continue;
+    const pts = (arr) => arr.map(([x, y]) => `${(cx + x).toFixed(1)},${(cy + y).toFixed(1)}`).join(' ');
+    const h = hx / 2;
+    cubes.push([pts([[0, 0], [h, -s / 2], [0, -s], [-h, -s / 2]]), 0]);
+    cubes.push([pts([[0, 0], [-h, -s / 2], [-h, s / 2], [0, s]]), 1]);
+    cubes.push([pts([[0, 0], [0, s], [h, s / 2], [h, -s / 2]]), 2]);
+  }
+  $$('[data-marqueteries] .placage').forEach((svg, n) => {
+    svg.innerHTML = `<defs><clipPath id="cl-${n}"><circle cx="60" cy="60" r="58"/></clipPath></defs><g clip-path="url(#cl-${n})">${cubes.map(([p, t]) => `<polygon points="${p}" fill="${tons[(t + n) % 3]}" stroke="#2a180b" stroke-width=".6"/>`).join('')}</g><circle cx="60" cy="60" r="58" fill="none" stroke="#c9a35b" stroke-width="1.4"/>`;
+    if (calme) return;
+    const polys = $$('polygon', svg);
+    gsap.from(polys, {
+      x: () => gsap.utils.random(-90, 90), y: () => gsap.utils.random(-90, 90), rotation: () => gsap.utils.random(-120, 120), opacity: 0, transformOrigin: '50% 50%',
+      duration: 1.3, ease: 'expo.out', stagger: { each: 0.008, from: 'random' }, scrollTrigger: { trigger: svg, start: 'top 85%', once: true },
+    });
+  });
+  if (!calme) gsap.from($$('[data-marqueteries] .marqueterie'), { y: 60, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.14, scrollTrigger: { trigger: '[data-marqueteries]', start: 'top 82%', once: true } });
+}
+
+/* ---------------- caisse de transport ---------------- */
+export function construireCaisse(svg) {
+  // la caisse s'ouvre : les planches du couvercle s'ecartent, le marquage reste
+  svg.setAttribute('viewBox', '0 0 300 200'); svg.setAttribute('preserveAspectRatio', 'none');
+  const n = 6; const hp = 200 / n;
+  let html = '';
+  for (let i = 0; i < n; i++) html += `<g class="couvercle" data-i="${i}"><rect class="planche${i % 2 ? ' claire' : ''}" x="-2" y="${(i * hp).toFixed(1)}" width="304" height="${(hp + 0.6).toFixed(1)}"/><circle class="clou" cx="10" cy="${(i * hp + hp / 2).toFixed(1)}" r="2.4"/><circle class="clou" cx="290" cy="${(i * hp + hp / 2).toFixed(1)}" r="2.4"/></g>`;
+  svg.innerHTML = html;
+  const marque = document.createElement('div');
+  marque.className = 'marquage-caisse'; marque.setAttribute('aria-hidden', 'true');
+  marque.innerHTML = '<span>Pierre Becq</span><small>Metz · Fragile · Haut</small>';
+  svg.parentElement.append(marque);
+  if (calme) { svg.style.display = 'none'; return; }
+  const couv = $$('.couvercle', svg);
+  const tl = gsap.timeline({ scrollTrigger: { trigger: svg.parentElement, start: 'top 72%', once: true } });
+  tl.to($$('.clou', svg), { scale: 0, opacity: 0, transformOrigin: '50% 50%', duration: 0.25, stagger: 0.04, ease: 'power2.in' })
+    .to(couv, { xPercent: (i) => (i % 2 ? 110 : -110), rotation: (i) => (i % 2 ? 4 : -4), duration: 1.1, ease: 'power3.inOut', stagger: 0.08 }, 0.4)
+    .from(marque, { scale: 1.8, opacity: 0, rotation: -12, duration: 0.5, ease: 'back.out(2.5)' }, 1.3)
+    .add(() => { svg.style.display = 'none'; });
+}

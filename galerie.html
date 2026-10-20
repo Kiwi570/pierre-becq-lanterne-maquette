@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La galerie — Pierre Becq, antiquaire à Metz</title>
+  <meta name="description" content="La galerie de Pierre Becq, antiquaire à Metz : mobilier, luminaires, pendules et bronzes, art sacré, objets d'art, tableaux, verre et céramique. Prix sur demande.">
+  <meta name="theme-color" content="#0b0908">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="Pierre Becq Antiquaire">
+  <meta property="og:title" content="La galerie de Pierre Becq, antiquaire à Metz">
+  <meta property="og:description" content="Mobilier et objets d'art du XVIe au XXe siècle, garantis anciens, certificat d'authenticité à la demande.">
+  <meta property="og:image" content="assets/img/partage-pierre-becq.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/bodoni-moda-italic.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/vendor/lenis.css">
+  <link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="galerie">
+<main id="principal">
+  <section class="entree entree--galerie" aria-labelledby="titre-galerie">
+    <div class="fond-photo fond-salon" aria-hidden="true"><picture><source media="(max-width: 700px)" srcset="assets/img/ambiance/g-salon-parquet-9x16-1200.webp"><img src="assets/img/ambiance/g-salon-parquet-16x9-1200.webp" alt="" data-parallaxe></picture></div>
+    <div class="vitrail" aria-hidden="true" data-vitrail></div>
+    <div class="contenu entree-galerie-texte">
+      <nav class="fil" aria-label="Fil d'Ariane"><a href="index.html">Accueil</a><span aria-hidden="true">/</span><span aria-current="page">La galerie</span></nav>
+      <h1 class="titre-geant"><span class="ligne"><span class="dore" data-dorure>La galerie</span></span></h1>
+      <div class="bas">
+        <p class="lead">Une sélection de nos pièces : mobilier et objets d'art du XVIe au XXe siècle. Notre marchandise vous est garantie ancienne et accompagnée d'un certificat d'authenticité à la demande.</p>
+        <p class="compte-grand chiffres"><span data-compte>15</span><small>pièces en ce moment</small></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="barre-filtres" role="region" aria-label="Trier et filtrer les pièces">
+    <div class="contenu">
+      <div class="filtres" data-filtres-familles aria-label="Familles"></div>
+      <div class="filtres filtres-2">
+        <div class="groupe" data-filtres-siecles aria-label="Siècles"></div>
+        <span class="sep" aria-hidden="true"></span>
+        <button class="filtre" type="button" data-f-lorraine aria-pressed="false">Lorraine</button>
+        <span class="sep" aria-hidden="true"></span>
+        <span class="mini" data-nb aria-live="polite"></span>
+        <button class="filtre" type="button" data-vue="vitrine" aria-pressed="true">Vitrine</button>
+        <button class="filtre" type="button" data-vue="siecles" aria-pressed="false">Par siècle</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="section galerie-zone" aria-label="Pièces de la galerie">
+    <div class="contenu" data-galerie></div>
+  </section>
+
+  <section class="section cherche" aria-labelledby="titre-cherche">
+    <div class="contenu intertitre cherche-grille">
+      <div>
+        <h2 class="titre-section" id="titre-cherche"><span class="dore" data-dorure>Vous cherchez</span> une pièce précise ?</h2>
+        <p class="lead">La galerie en ligne ne montre qu'une partie du stock. Dites-nous ce que vous cherchez : époque, style, dimensions.</p>
+      </div>
+      <a class="bouton bouton--or" href="index.html#contact"><span>Nous écrire</span></a>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="grand-nom" data-grand-nom></div>
+  <div class="contenu pied-bas">
+    <address class="pied-coord">Pierre Becq Antiquaire<br>5 rue Gambetta, 57000 Metz, <a class="lien chiffres tel" href="tel:+33387636161">03 87 63 61 61</a><br>3 rue de la Fontaine, 55230 Senon, <a class="lien chiffres tel" href="tel:+33329859817">03 29 85 98 17</a></address>
+    <nav aria-label="Liens de pied de page">
+      <a class="lien" href="galerie.html">La galerie</a><a class="lien" href="expertise.html">L'expertise</a><a class="lien" href="index.html#boutiques">Boutiques</a><a class="lien" href="mentions.html">Mentions légales</a>
+    </nav>
+    <div class="reseaux"><a class="lien" href="https://www.facebook.com/pierrebecqantiquaire" target="_blank" rel="noopener">Facebook</a><a class="lien" href="https://www.instagram.com/pierrebecqantiquaire" target="_blank" rel="noopener">Instagram</a><a class="lien" href="https://www.linkedin.com/in/pierre-andré-becq-947790132/" target="_blank" rel="noopener">LinkedIn</a></div>
+  </div>
+  <p class="note contenu">Maquette de démonstration : la sélection, les demandes de prix et les formulaires sont simulés. Les ambiances sont des visuels de travail ; les pièces sont présentées avec leurs vraies photos.</p>
+</footer>
+
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+<script src="assets/vendor/CustomEase.min.js"></script>
+<script src="data/objets.js"></script>
+<script type="module" src="assets/js/galerie.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pendule Empire — Pierre Becq, antiquaire à Metz</title>
+  <meta name="description" content="Pièce de la galerie de Pierre Becq, antiquaire à Metz. Prix sur demande, certificat d'authenticité à la demande.">
+  <meta name="theme-color" content="#0b0908">
+  <meta property="og:type" content="product">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="Pierre Becq Antiquaire">
+  <meta property="og:title" content="Pièce de la galerie Pierre Becq">
+  <meta property="og:image" content="assets/img/partage-pierre-becq.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/bodoni-moda-italic.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/vendor/lenis.css">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script>document.documentElement.classList.add('attente');</script>
+</head>
+<body data-page="objet">
+<main id="principal">
+  <section class="entree entree--objet" aria-labelledby="titre-objet">
+    <div class="fond-gl" data-fond-gl aria-hidden="true"><div class="gl-repli" data-img="assets/img/ambiance/g-boiserie-laque-16x9-1200.webp" data-img-m="assets/img/ambiance/g-boiserie-laque-9x16-1200.webp"></div></div>
+    <div class="contenu objet-grille">
+      <div class="objet-infos">
+        <nav class="fil" aria-label="Fil d'Ariane" data-fil></nav>
+        <h1 class="titre-objet" id="titre-objet"><span class="dore" data-titre data-dorure></span></h1>
+        <p class="epoque-objet" data-epoque></p>
+        <dl class="cartel-objet" data-cartel></dl>
+        <p class="prix-objet"><span class="sur-titre">Prix</span><strong>Sur demande</strong></p>
+        <div class="actions" data-actions></div>
+        <p class="mini garantie">Garantie ancienne. Certificat d'authenticité à la demande. Expédition par des professionnels.</p>
+      </div>
+      <figure class="objet-scene" data-scene></figure>
+    </div>
+  </section>
+
+  <section class="section vues" aria-labelledby="titre-vues">
+    <div class="contenu vues-grille">
+      <div class="visionneuse" data-visionneuse>
+        <img data-vue alt="">
+        <div class="loupe" aria-hidden="true"><i></i></div>
+        <button class="outil plein" type="button" data-plein aria-label="Afficher en plein écran"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></button>
+        <p class="aide mini" data-aide>Survolez la photo : la loupe de l'expert grossit les détails.</p>
+      </div>
+      <div class="vues-cote">
+        <h2 class="titre-moyen" id="titre-vues">Toutes les vues</h2>
+        <div class="vignettes" data-vignettes role="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section oeil" aria-labelledby="titre-oeil">
+    <div class="contenu oeil-grille">
+      <div>
+        <p class="sur-titre">L'œil de l'expert</p>
+        <h2 class="titre-section" id="titre-oeil"><span class="dore" data-dorure>À propos</span> de la pièce</h2>
+      </div>
+      <div class="oeil-texte" data-description></div>
+    </div>
+  </section>
+
+  <section class="section echelle" id="echelle" aria-labelledby="titre-echelle" data-section-echelle>
+    <div class="contenu">
+      <div class="intertitre">
+        <h2 class="titre-section" id="titre-echelle"><span class="dore" data-dorure>Vue à l'échelle</span></h2>
+        <p class="petit" data-echelle-texte>La pièce à ses vraies dimensions, à côté d'une silhouette de 1,70 m.</p>
+      </div>
+      <div class="echelle-scene" data-echelle></div>
+    </div>
+  </section>
+
+  <section class="section demande" id="demande" aria-labelledby="titre-demande">
+    <div class="contenu demande-grille">
+      <div>
+        <p class="sur-titre">Cette pièce vous intéresse</p>
+        <h2 class="titre-section" id="titre-demande"><span class="dore" data-dorure>Demander le prix</span></h2>
+        <p class="lead">Nous vous répondons avec le prix, d'autres photos si vous le souhaitez, et les conditions de transport.</p>
+        <div class="coord">
+          <p><strong>Metz</strong> <a class="lien chiffres tel" href="tel:+33387636161">03 87 63 61 61</a></p>
+          <p><strong>Senon</strong> <a class="lien chiffres tel" href="tel:+33329859817">03 29 85 98 17</a></p>
+        </div>
+      </div>
+      <form class="formulaire" data-formulaire-objet novalidate>
+        <fieldset class="choix" aria-label="Votre demande">
+          <legend class="mini">Je souhaite</legend>
+          <label><input type="radio" name="motif" value="Connaître le prix" checked><span>Connaître le prix</span></label>
+          <label><input type="radio" name="motif" value="Recevoir d'autres photos"><span>D'autres photos</span></label>
+          <label><input type="radio" name="motif" value="Voir la pièce en boutique"><span>La voir en boutique</span></label>
+          <label><input type="radio" name="motif" value="Un devis de transport"><span>Un devis de transport</span></label>
+        </fieldset>
+        <div class="rang-champs">
+          <div class="champ"><label for="o-nom">Nom</label><input id="o-nom" name="nom" autocomplete="name" required></div>
+          <div class="champ"><label for="o-email">E-mail</label><input id="o-email" name="email" type="email" autocomplete="email" required></div>
+        </div>
+        <div class="champ"><label for="o-tel">Téléphone (facultatif)</label><input id="o-tel" name="tel" type="tel" autocomplete="tel"></div>
+        <div class="champ"><label for="o-msg">Message</label><textarea id="o-msg" name="message" rows="4" required data-message></textarea></div>
+        <p class="erreur" data-erreur role="alert"></p>
+        <button class="bouton bouton--or" type="submit"><span>Envoyer la demande</span></button>
+        <p class="mini">Maquette : la demande n'est pas envoyée.</p>
+      </form>
+    </div>
+  </section>
+
+  <section class="section famille" aria-labelledby="titre-famille">
+    <div class="contenu">
+      <div class="intertitre"><h2 class="titre-section" id="titre-famille" data-titre-famille>Dans la même famille</h2><a class="lien" href="galerie.html" data-lien-famille>Toute la galerie</a></div>
+      <div class="famille-grille" data-famille></div>
+      <nav class="suite" data-suite aria-label="Pièce précédente et suivante"></nav>
+    </div>
+  </section>
+</main>
+
+<div class="plein-ecran" data-plein-ecran role="dialog" aria-modal="true" aria-label="Photo en plein écran">
+  <button class="outil fermer" type="button" data-fermer-plein aria-label="Fermer"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.4"/></svg></button>
+  <img alt="">
+</div>
+
+<footer class="pied">
+  <div class="grand-nom" data-grand-nom></div>
+  <div class="contenu pied-bas">
+    <address class="pied-coord">Pierre Becq Antiquaire<br>5 rue Gambetta, 57000 Metz, <a class="lien chiffres tel" href="tel:+33387636161">03 87 63 61 61</a><br>3 rue de la Fontaine, 55230 Senon, <a class="lien chiffres tel" href="tel:+33329859817">03 29 85 98 17</a></address>
+    <nav aria-label="Liens de pied de page">
+      <a class="lien" href="galerie.html">La galerie</a><a class="lien" href="expertise.html">L'expertise</a><a class="lien" href="index.html#boutiques">Boutiques</a><a class="lien" href="mentions.html">Mentions légales</a>
+    </nav>
+    <div class="reseaux"><a class="lien" href="https://www.facebook.com/pierrebecqantiquaire" target="_blank" rel="noopener">Facebook</a><a class="lien" href="https://www.instagram.com/pierrebecqantiquaire" target="_blank" rel="noopener">Instagram</a><a class="lien" href="https://www.linkedin.com/in/pierre-andré-becq-947790132/" target="_blank" rel="noopener">LinkedIn</a></div>
+  </div>
+  <p class="note contenu">Maquette de démonstration : la sélection, les demandes de prix et les formulaires sont simulés. Les ambiances sont des visuels de travail ; les pièces sont présentées avec leurs vraies photos.</p>
+</footer>
+
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+<script src="assets/vendor/CustomEase.min.js"></script>
+<script src="data/objets.js"></script>
+<script type="module" src="assets/js/objet.js"></script>
+</body>
+</html>
