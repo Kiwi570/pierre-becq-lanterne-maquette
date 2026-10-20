@@ -249,7 +249,7 @@ function monterCurseur() {
   const f = document.querySelector('.flamme');
   const anneau = document.querySelector('.curseur-anneau');
   const lib = anneau.querySelector('span');
-  const fx = gsap.quickTo(f, 'x', { duration: 0.18, ease: 'power3' }); const fy = gsap.quickTo(f, 'y', { duration: 0.18, ease: 'power3' });
+  const fx = gsap.quickTo(f, 'x', { duration: 0.06, ease: 'power2' }); const fy = gsap.quickTo(f, 'y', { duration: 0.06, ease: 'power2' });
   const ax = gsap.quickTo(anneau, 'x', { duration: 0.45, ease: 'power3' }); const ay = gsap.quickTo(anneau, 'y', { duration: 0.45, ease: 'power3' });
   const penche = gsap.quickTo(f.querySelector('i'), 'rotation', { duration: 0.5, ease: 'power2' });
   let px = 0;
@@ -321,15 +321,15 @@ PB.dorer = (racine = document, { debut = 'top 86%', delai = 0 } = {}) => {
   racine.querySelectorAll('[data-dorure]').forEach((el) => {
     if (el.dataset.dorOk) return;
     el.dataset.dorOk = '1';
-    if (calme) return;
     const texte = el.textContent;
     el.innerHTML = `<span class="sr">${PB.esc(texte)}</span>` + texte.split(/(\s+)/).map((m) => (m.trim() ? `<span class="dore-mot" aria-hidden="true">${PB.esc(m)}</span>` : m)).join('');
     el.classList.remove('dore');
     const mots = [...el.querySelectorAll('.dore-mot')];
     mots.forEach((m) => m.classList.add('dore'));
+    if (calme) { gsap.set(mots, { backgroundPosition: '60px 0px, 0% 0%' }); return; }
     const tl = gsap.timeline({ paused: true, delay: delai });
     tl.fromTo(mots, { clipPath: 'inset(-40% 100% -60% -10%)', y: 14, skewX: -6 }, { clipPath: 'inset(-40% -10% -60% -10%)', y: 0, skewX: 0, duration: 1.15, ease: 'feuille', stagger: 0.09, onComplete: () => gsap.set(mots, { clearProps: 'clipPath' }) })
-      .fromTo(mots, { backgroundPosition: '0 0, 120% 0' }, { backgroundPosition: '40px 0, 30% 0', duration: 2.2, ease: 'power2.out', stagger: 0.09 }, 0);
+      .fromTo(mots, { backgroundPosition: '0px 0px, 100% 0%' }, { backgroundPosition: '60px 0px, 0% 0%', duration: 2.4, ease: 'power2.out', stagger: 0.09 }, 0);
     el._dorure = tl;
     if (el.closest('.entree')) { PB.pret.then(() => tl.play()); return; }
     ScrollTrigger.create({ trigger: el, start: debut, once: true, onEnter: () => tl.play() });
@@ -545,8 +545,8 @@ function monterTransitions() {
   if (memo.session('pb-transition') === '1' && !calme) {
     memo.session('pb-transition', '0');
     etat.r = 0; appliquer(); iris.style.setProperty('--x', '50%'); iris.style.setProperty('--y', '50%');
-    gsap.to(etat, { r: 150, duration: 1.1, ease: 'power2.inOut', delay: 0.08, onUpdate: appliquer });
-  } else { etat.r = 150; appliquer(); }
+    gsap.to(etat, { r: 150, duration: 1.1, ease: 'power2.inOut', delay: 0.08, onUpdate: appliquer, onComplete: () => { iris.style.visibility = 'hidden'; } });
+  } else { etat.r = 150; appliquer(); iris.style.visibility = 'hidden'; }
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
     if (!a || calme || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank') return;
@@ -557,13 +557,13 @@ function monterTransitions() {
     e.preventDefault();
     memo.session('pb-transition', '1');
     iris.style.setProperty('--x', `${e.clientX || innerWidth / 2}px`); iris.style.setProperty('--y', `${e.clientY || innerHeight / 2}px`);
-    iris.classList.add('actif');
+    iris.classList.add('actif'); iris.style.visibility = 'visible';
     gsap.timeline({ onComplete: () => { location.href = url.href; } })
       .to(etat, { r: 0, duration: 0.75, ease: 'power3.in', onUpdate: appliquer })
       .fromTo(fumee, { opacity: 0, y: 20 }, { opacity: 0.8, y: -30, duration: 0.5, ease: 'power1.out' }, 0.45);
     if (Pendule.actif) Pendule.tic(0.4, false);
   });
-  addEventListener('pageshow', (e) => { if (e.persisted) { etat.r = 150; appliquer(); iris.classList.remove('actif'); gsap.set(fumee, { opacity: 0 }); } });
+  addEventListener('pageshow', (e) => { if (e.persisted) { etat.r = 150; appliquer(); iris.classList.remove('actif'); iris.style.visibility = 'hidden'; gsap.set(fumee, { opacity: 0 }); } });
 }
 
 /* ---------- ouverture : une flamme s'allume dans le noir ---------- */

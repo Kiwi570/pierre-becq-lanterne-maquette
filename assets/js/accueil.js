@@ -53,7 +53,12 @@ if (!calme) {
 
 /* ---------------- 3. coups de coeur ---------------- */
 const piste = $('[data-piste-salle]');
-const hauteurSalle = () => (bureau() ? Math.max(260, Math.min(470, innerHeight - 380)) : Math.min(innerHeight * 0.4, 330));
+// sur ordinateur, la salle tient dans l'ecran : pieces, etiquettes et boutons toujours visibles
+const hauteurSalle = () => {
+  if (!bureau()) return Math.min(innerHeight * 0.4, 330);
+  $('#coups-de-coeur').classList.add('est-epinglee');
+  return Math.max(130, Math.min(440, $('.salle-piste-zone').clientHeight - 190));
+};
 const rendreSalle = () => {
   const H = hauteurSalle();
   piste.innerHTML = PB.objets.map((x) => pieceSalle(x, hauteurRelative(x, H, H * 0.42))).join('');
@@ -102,6 +107,7 @@ function animerSalle() {
     const pr = Math.min(1, Math.max(0, (p.offsetLeft + p.offsetWidth / 2 - innerWidth / 2) / d));
     const y = st.start + (st.end - st.start) * pr;
     if (PB.lenis) PB.lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
+    ScrollTrigger.update(); st.getTween?.()?.progress(1);
   });
 }
 
@@ -109,7 +115,7 @@ function animerSalle() {
 const DEBUT = 1670; const FIN = 2000;
 function construireFrise() {
   const scene = $('[data-frise]'); const pisteF = $('[data-frise-piste]');
-  const k = bureau() ? Math.max(9, innerWidth / 110) : 7.5; // pixels par annee
+  const k = bureau() ? Math.max(9, innerWidth / 110) : 11; // pixels par annee
   const marge = bureau() ? innerWidth * 0.5 : 60;
   const X = (a) => marge + (a - DEBUT) * k;
   const largeur = X(FIN) + marge;
@@ -117,17 +123,21 @@ function construireFrise() {
   let html = '<div class="frise-axe"></div>';
   for (let a = 1680; a <= FIN; a += 10) html += `<span class="frise-tic${a % 50 === 0 ? ' decennie' : ''}" style="left:${X(a)}px">${a % 50 === 0 ? `<span class="chiffres">${a}</span>` : ''}</span>`;
   [['XVIIe', 1670, 1700], ['XVIIIe', 1701, 1800], ['XIXe', 1801, 1900], ['XXe', 1901, 2000]].forEach(([n, a]) => { html += `<span class="frise-siecle dore" style="left:${X(Math.max(a, DEBUT)) + 6}px">${n}<span class="sr"> siècle</span></span>`; });
-  const Hh = bureau() ? Math.min(270, innerHeight * 0.27) : 150;
+  const anneeEl0 = $('[data-frise-annee]');
+  $('.frise-tete').append(anneeEl0);
+  if (bureau()) $('#frise').classList.add('est-epinglee');
+  else $('.frise-tete').insertAdjacentHTML('beforeend', '<p class="mini indice-glisser" aria-hidden="true">Faites glisser la frise →</p>');
+  const Hh = bureau() ? Math.max(90, Math.min(240, scene.clientHeight / 2 - 92)) : 130;
   triees.forEach((x, i) => {
     const pos = i % 2 ? 'bas' : 'haut';
     html += `<a class="frise-piece ${pos}" href="${PB.lien(x)}" data-carte data-annee="${x.annee}" style="left:${X(x.annee)}px" aria-label="${PB.esc(x.titre)}, ${PB.esc(x.epoque)}">
-      ${visuelPiece(x, { hauteur: hauteurRelative(x, Hh, Hh * 0.5) })}<span class="date">${PB.esc(x.epoque)}</span><span class="t">${PB.esc(x.titre)}</span></a>`;
+      ${visuelPiece(x, { hauteur: hauteurRelative(x, Hh, Hh * 0.72) })}<span class="date">${PB.esc(x.epoque)}</span><span class="t">${PB.esc(x.titre)}</span></a>`;
   });
   pisteF.innerHTML = html;
   pisteF.style.width = `${largeur}px`;
   const anneeEl = $('[data-frise-annee]');
   if (!bureau()) {
-    scene.style.overflowX = 'auto'; scene.style.height = `${Hh * 2 + 330}px`;
+    scene.style.overflowX = 'auto'; scene.style.height = `${(Hh + 90) * 2 + 80}px`;
     scene.addEventListener('scroll', () => { anneeEl.textContent = Math.round(DEBUT + (scene.scrollLeft + scene.clientWidth / 2 - marge) / k); }, { passive: true });
     return;
   }
@@ -151,6 +161,7 @@ function construireFrise() {
     const pr = Math.min(1, Math.max(0, (p.offsetLeft - innerWidth / 2) / dist()));
     const y = st.start + (st.end - st.start) * pr;
     if (PB.lenis) PB.lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
+    ScrollTrigger.update(); st.getTween?.()?.progress(1); ScrollTrigger.update();
   });
 }
 
