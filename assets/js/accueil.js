@@ -43,13 +43,25 @@ const annees = PB.annees();
 $('[data-annees-depuis]').textContent = `${annees} ans d'antiquités`;
 if (!calme) {
   const ann = $('[data-annee]'); const c = { v: new Date().getFullYear() };
-  ScrollTrigger.create({ trigger: '.maison', start: 'top 70%', once: true, onEnter: () => gsap.to(c, { v: 1969, duration: 2.4, ease: 'power3.out', onUpdate: () => { ann.textContent = Math.round(c.v); } }) });
-  gsap.from($$('[data-cachets] .cachet'), { opacity: 0, duration: 0.01, stagger: 0.16, scrollTrigger: { trigger: '[data-cachets]', start: 'top 82%', once: true } });
-  gsap.from($$('[data-cachets] .cire'), { scale: 1.9, opacity: 0, rotation: () => gsap.utils.random(-30, 30), duration: 0.55, ease: 'back.out(2.2)', stagger: 0.16, scrollTrigger: { trigger: '[data-cachets]', start: 'top 82%', once: true } });
-  gsap.from($$('[data-cachets] .cachet strong, [data-cachets] .cachet > span:not(.cire)'), { opacity: 0, y: 10, duration: 0.6, stagger: 0.08, delay: 0.3, scrollTrigger: { trigger: '[data-cachets]', start: 'top 82%', once: true } });
+  let dernier = 0;
+  const compter = (duree = 2.4) => { c.v = new Date().getFullYear(); gsap.to(c, { v: 1969, duration: duree, ease: 'power3.out', overwrite: true, onUpdate: () => { const v = Math.round(c.v); if (v !== dernier) { dernier = v; ann.textContent = v; if (PB.son.actif && v % 5 === 0) PB.son.tic(0.18, v % 10 === 0); } } }); };
+  ScrollTrigger.create({ trigger: '.maison', start: 'top 70%', once: true, onEnter: () => compter() });
+  const zoneAnnee = $('.maison-annees');
+  zoneAnnee.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') compter(1.6); });
+  zoneAnnee.addEventListener('click', () => compter(1.6));
+  gsap.from($$('[data-cachets] .cachet'), { opacity: 0, duration: 0.01, stagger: 0.16, scrollTrigger: { trigger: '[data-cachets]', start: 'top 92%', once: true } });
+  gsap.from($$('[data-cachets] .cire'), { scale: 1.9, opacity: 0, rotation: () => gsap.utils.random(-30, 30), duration: 0.55, ease: 'back.out(2.2)', stagger: 0.16, clearProps: 'transform,opacity', scrollTrigger: { trigger: '[data-cachets]', start: 'top 92%', once: true } });
+  gsap.from($$('[data-cachets] .cachet strong, [data-cachets] .cachet > span:not(.cire)'), { opacity: 0, y: 10, duration: 0.6, stagger: 0.08, delay: 0.3, scrollTrigger: { trigger: '[data-cachets]', start: 'top 92%', once: true } });
   gsap.fromTo('[data-parallaxe-photo] img', { yPercent: -6, scale: 1.12 }, { yPercent: 6, scale: 1.12, ease: 'none', scrollTrigger: { trigger: '.maison-photo', start: 'top bottom', end: 'bottom top', scrub: true } });
-  gsap.from('.maison-photo', { clipPath: 'inset(100% 0 0 0)', duration: 1.4, ease: 'power3.inOut', scrollTrigger: { trigger: '.maison-photo', start: 'top 80%', once: true } });
+  gsap.from('.maison-photo .cadre-photo', { clipPath: 'inset(100% 0 0 0)', duration: 1.4, ease: 'power3.inOut', clearProps: 'clipPath', scrollTrigger: { trigger: '.maison-photo', start: 'top 90%', once: true } });
+  gsap.from('.maison-photo figcaption', { opacity: 0, y: 10, duration: 0.7, delay: 0.5, ease: 'power2.out', scrollTrigger: { trigger: '.maison-photo', start: 'top 90%', once: true } });
 }
+
+// un cachet se presse comme un sceau qu'on appose
+$$('[data-cachets] .cachet').forEach((li) => li.addEventListener('pointerdown', () => {
+  const cire = $('.cire', li); cire.classList.remove('presse'); void cire.offsetWidth; cire.classList.add('presse');
+  PB.son.tic(0.45, false);
+}));
 
 /* ---------------- 3. coups de coeur ---------------- */
 const piste = $('[data-piste-salle]');
@@ -89,8 +101,15 @@ function animerSalle() {
       hudN.textContent = `${k + 1} / ${pieces.length}`; hudT.textContent = PB.objets[k].titre;
     }), { root: zone, threshold: 0.6 });
     pieces.forEach((p) => io.observe(p));
+    let x0 = zone.scrollLeft; let t0 = performance.now(); let repos;
+    const balanM = gsap.quickTo(sec, '--balan', { duration: 0.4, ease: 'power2' });
     zone.addEventListener('scroll', () => {
       const m = zone.scrollWidth - zone.clientWidth; hudB.style.transform = `scaleX(${m > 0 ? zone.scrollLeft / m : 0})`;
+      if (!calme) {
+        const t = performance.now(); const v = (zone.scrollLeft - x0) / Math.max(16, t - t0) * 1000; x0 = zone.scrollLeft; t0 = t;
+        balanM(gsap.utils.clamp(-10, 10, -v / 160));
+        clearTimeout(repos); repos = setTimeout(() => gsap.to(sec, { '--balan': 0, duration: 1.8, ease: 'elastic.out(1.1, 0.2)' }), 140);
+      }
       $('.indice-salle', sec)?.classList.add('vu');
     }, { passive: true });
     return;
@@ -100,11 +119,17 @@ function animerSalle() {
   sec.insertAdjacentHTML('beforeend', `<div class="hud-salle" aria-hidden="true"><span class="chiffres" data-hud-n>1 / ${pieces.length}</span><strong data-hud-t>${PB.esc(PB.objets[0].titre)}</strong><span class="barre"><i data-hud-barre></i></span></div>`);
   const hudN = $('[data-hud-n]', sec); const hudT = $('[data-hud-t]', sec); const hudB = $('[data-hud-barre]', sec);
   const vit = $('[data-vitrail]', sec);
+  // les etiquettes se balancent selon la vitesse du defilement, puis reviennent en oscillant
+  const balan = gsap.quickTo(sec, '--balan', { duration: 0.5, ease: 'power2' });
+  let retour = null;
   const st = ScrollTrigger.create({
     trigger: sec, start: 'top top', end: () => `+=${distance()}`, pin: true, scrub: 0.7, animation: tw, invalidateOnRefresh: true, anticipatePin: 1,
+    onScrubComplete: () => { retour = gsap.to(sec, { '--balan': 0, duration: 2, ease: 'elastic.out(1.1, 0.18)' }); },
   });
   tw.eventCallback('onUpdate', () => {
     const pr = tw.progress();
+    const v = st.getVelocity();
+    if (Math.abs(v) > 30) { retour?.kill(); retour = null; balan(gsap.utils.clamp(-12, 12, -v / 110)); }
     hudB.style.transform = `scaleX(${pr})`;
     gsap.set(vit, { xPercent: -18 + pr * 36, opacity: 0.25 + Math.sin(pr * Math.PI * 3) ** 2 * 0.5 });
     const mid = innerWidth / 2; let best = null; let bd = 1e9;
@@ -153,7 +178,7 @@ function construireFriseVerticale() {
   }), { rootMargin: '-48% 0px -48% 0px' });
   items.forEach((li) => io.observe(li));
   if (calme) return;
-  items.forEach((li) => gsap.from($('a', li), { x: 40, opacity: 0, duration: 0.9, ease: 'expo.out', scrollTrigger: { trigger: li, start: 'top 88%', once: true } }));
+  items.forEach((li) => gsap.from($('a', li), { x: 40, opacity: 0, duration: 0.9, ease: 'expo.out', scrollTrigger: { trigger: li, start: 'top 95%', once: true } }));
   gsap.from($$('.frise-v-siecle', pisteF), { opacity: 0, x: -20, duration: 0.8, ease: 'power3.out', stagger: 0, scrollTrigger: { trigger: pisteF, start: 'top 85%', once: true } });
 }
 
@@ -172,7 +197,7 @@ function construireFrise() {
   $('.frise-tete').append(anneeEl0);
   if (bureau()) $('#frise').classList.add('est-epinglee');
   else $('.frise-tete').insertAdjacentHTML('beforeend', '<p class="mini indice-glisser" aria-hidden="true">Faites glisser la frise →</p>');
-  const Hh = bureau() ? Math.max(90, Math.min(240, scene.clientHeight / 2 - 92)) : 130;
+  const Hh = bureau() ? Math.max(80, Math.min(240, scene.clientHeight / 2 - 128)) : 130;
   triees.forEach((x, i) => {
     const pos = i % 2 ? 'bas' : 'haut';
     html += `<a class="frise-piece ${pos}" href="${PB.lien(x)}" data-carte data-annee="${x.annee}" style="left:${X(x.annee)}px" aria-label="${PB.esc(x.titre)}, ${PB.esc(x.epoque)}">
@@ -215,9 +240,11 @@ function construireFrise() {
   });
   const balancier = gsap.to('.frise-pendule', { rotation: 2.5, transformOrigin: '50% 0%', duration: 1, ease: 'sine.inOut', yoyo: true, repeat: -1, paused: true });
   ScrollTrigger.create({ trigger: '#frise', start: 'top bottom', end: 'bottom top', onToggle: (s) => (s.isActive ? balancier.play() : balancier.pause()) });
-  $$('.frise-piece', pisteF).forEach((p) => {
+  $$('.frise-piece', pisteF).forEach((p, n) => {
     const haut = p.classList.contains('haut');
-    gsap.fromTo(p, { y: haut ? -160 : 160, opacity: 0 }, { y: 0, opacity: 1, ease: 'bounce.out', duration: 1, scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 62%', toggleActions: 'play none none reverse' } });
+    const deja = parseFloat(p.style.left) < innerWidth * 0.96;
+    const st2 = deja ? { trigger: '#frise', start: 'top 70%', toggleActions: 'play none none reverse' } : { trigger: p, containerAnimation: tw, start: 'left 96%', toggleActions: 'play none none reverse' };
+    gsap.fromTo(p, { y: haut ? -160 : 160, opacity: 0 }, { y: 0, opacity: 1, ease: 'bounce.out', duration: 1, delay: deja ? n * 0.12 : 0, scrollTrigger: st2 });
   });
   pisteF.addEventListener('focusin', (ev) => {
     const p = ev.target.closest('.frise-piece'); if (!p) return;
@@ -251,11 +278,11 @@ function construireLorraine() {
   if (calme) return;
   const veines = $$('path', svg);
   veines.forEach((v) => { const l = v.getTotalLength(); v.style.strokeDasharray = l; v.style.strokeDashoffset = l; });
-  const tlB = gsap.timeline({ scrollTrigger: { trigger: '[data-bois]', start: 'top 72%', once: true } });
+  const tlB = gsap.timeline({ scrollTrigger: { trigger: '[data-bois]', start: 'top 85%', once: true } });
   tlB.to(veines, { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut', stagger: 0.04 })
     .fromTo('[data-bois] .matiere-fond img', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.6, ease: 'power3.inOut' }, 0.5)
     .to(veines, { opacity: 0.25, duration: 1 }, 1.8)
-    .from($$('[data-pieces-bois] img'), { y: 90, opacity: 0, duration: 1.2, ease: 'power3.out', stagger: 0.15 }, 1.1);
+    .from($$('[data-pieces-bois] img'), { y: 90, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.12 }, 0.5);
   // gravure a l'acide : le vase apparait par morsures successives (canvas temporaire)
   const img = $('[data-pieces-verre] img');
   const lancer = () => {
@@ -288,7 +315,7 @@ function construireLorraine() {
       onComplete: () => { img.style.opacity = '1'; cv.remove(); },
     });
   };
-  ScrollTrigger.create({ trigger: '[data-verre]', start: 'top 68%', once: true, onEnter: lancer });
+  ScrollTrigger.create({ trigger: '[data-verre]', start: 'top 80%', once: true, onEnter: lancer });
 }
 
 /* ---------------- 7. carte ---------------- */
@@ -310,7 +337,7 @@ function construireCarte() {
   if (calme) return;
   const routes = $$('.route', z);
   routes.forEach((r) => { const l = r.getTotalLength(); gsap.set(r, { strokeDasharray: `${l}`, strokeDashoffset: l }); });
-  gsap.timeline({ scrollTrigger: { trigger: z, start: 'top 75%', once: true } })
+  gsap.timeline({ scrollTrigger: { trigger: z, start: 'top 88%', once: true } })
     .from($('.pays', z), { opacity: 0, duration: 1.2 })
     .from($$('.point, .halo, text', z), { opacity: 0, scale: 0, transformOrigin: 'center', duration: 0.5, stagger: 0.08, ease: 'back.out(2)' }, 0.5)
     .to(routes, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut', stagger: 0.2, onComplete: () => routes.forEach((r) => gsap.set(r, { strokeDasharray: '5 6', strokeDashoffset: 0 })) }, 1);
@@ -336,10 +363,10 @@ function construireContact() {
   PB.monterFormulaire($('[data-formulaire]'), { message: (f) => `Votre demande a bien été notée${f.querySelector('#c-nom').value ? `, ${f.querySelector('#c-nom').value.trim()}` : ''}.` });
   if (!calme) {
     $$('.boutique figure img').forEach((img) => gsap.fromTo(img, { yPercent: -5, scale: 1.1 }, { yPercent: 5, scale: 1.1, ease: 'none', scrollTrigger: { trigger: img.closest('figure'), start: 'top bottom', end: 'bottom top', scrub: true } }));
-    gsap.from($$('.boutique'), { y: 60, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.15, scrollTrigger: { trigger: '.boutiques-grille', start: 'top 82%', once: true } });
-    gsap.from('.conteneur img', { scale: 1.2, duration: 1.6, ease: 'power3.out', scrollTrigger: { trigger: '.conteneur', start: 'top 85%', once: true } });
+    gsap.from($$('.boutique'), { y: 60, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.15, scrollTrigger: { trigger: '.boutiques-grille', start: 'top 92%', once: true } });
+    gsap.from('.conteneur img', { scale: 1.2, duration: 1.6, ease: 'power3.out', scrollTrigger: { trigger: '.conteneur', start: 'top 94%', once: true } });
     gsap.fromTo('.caisse-fond', { scale: 1.15 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.caisse-scene', start: 'top bottom', end: 'bottom top', scrub: true } });
-    gsap.from($$('.liste-or li'), { x: -20, opacity: 0, duration: 0.6, stagger: 0.06, ease: 'power2.out', scrollTrigger: { trigger: '.liste-or', start: 'top 85%', once: true } });
+    gsap.from($$('.liste-or li'), { x: -20, opacity: 0, duration: 0.6, stagger: 0.06, ease: 'power2.out', scrollTrigger: { trigger: '.liste-or', start: 'top 94%', once: true } });
   }
 }
 

@@ -77,6 +77,15 @@ if (!calme) {
   });
 }
 
+// la piece tourne legerement vers la flamme du curseur
+if (!calme && PB.pointeurFin) {
+  const cible = $('img', scene).closest('.cadre-dore') || $('img', scene);
+  gsap.set(cible, { transformPerspective: 1000 });
+  const ry = gsap.quickTo(cible, 'rotationY', { duration: 1.2, ease: 'power3' });
+  const rx = gsap.quickTo(cible, 'rotationX', { duration: 1.2, ease: 'power3' });
+  addEventListener('pointermove', (ev) => { if (scrollY > innerHeight) return; ry(((ev.clientX / innerWidth) - 0.6) * 10); rx((0.5 - ev.clientY / innerHeight) * 5); }, { passive: true });
+}
+
 /* ---------- vues et loupe d'expert ---------- */
 const vis = $('[data-visionneuse]'); const vue = $('[data-vue]'); const loupe = $('.loupe', vis);
 const VUES = O.vues;
@@ -199,7 +208,7 @@ if (pap) {
     gsap.to(ps, { strokeDashoffset: 0, duration: 2.4, ease: 'power2.inOut', stagger: 0.2, scrollTrigger: { trigger: pap, start: 'top 85%', once: true } });
   }
 }
-if (!calme) gsap.from($$('.oeil-texte > *'), { opacity: 0, y: 24, duration: 0.9, ease: 'power3.out', stagger: 0.08, scrollTrigger: { trigger: '.oeil-texte', start: 'top 80%', once: true } });
+if (!calme) gsap.from($$('.oeil-texte > *'), { opacity: 0, y: 24, duration: 0.9, ease: 'power3.out', stagger: 0.08, scrollTrigger: { trigger: '.oeil-texte', start: 'top 92%', once: true } });
 
 /* ---------- vue a l'echelle ---------- */
 const zoneE = $('[data-echelle]');
@@ -233,10 +242,14 @@ function echelle() {
   if (mur) bas = sol - basMur * k;
   const larg = objL * k; const haut = objH * k;
   const xObj = console_ ? xo + (Math.max(100, objL + 30) * k - larg) / 2 : xo;
-  const cotes = `<span class="ligne-cote" style="left:${xObj + larg + 14}px;top:${bas - haut}px;height:${haut}px"></span><span class="cote chiffres" style="left:${xObj + larg + 22}px;top:${bas - haut / 2 - 12}px">H ${String(objH).replace('.', ',')} cm</span>`;
+  // la cote se place a droite de la piece, ou sous elle s'il n'y a pas la place
+  const aDroite = xObj + larg + 110 <= W;
+  const xLigne = xObj + larg + 14 <= W - 4 ? xObj + larg + 14 : xObj - 14;
+  const etiq = aDroite ? `left:${xLigne + 8}px;top:${Math.max(6, bas - haut / 2 - 12)}px` : `left:${Math.max(6, Math.min(xObj + larg / 2 - 45, W - 100))}px;top:${bas + 10}px`;
+  const cotes = `<span class="ligne-cote" style="left:${xLigne}px;top:${bas - haut}px;height:${haut}px"></span><span class="cote chiffres" style="${etiq}">H\u00a0${String(objH).replace('.', ',')}\u00a0cm</span>`;
   zoneE.innerHTML = `${sil}${meuble}<img class="objet-echelle" src="${PB.src(v, Math.max(80, larg * 2))}" alt="${e(O.titre)} à l'échelle" style="left:${xObj}px;top:${bas - haut}px;width:${larg}px;height:${haut}px">${cotes}<span class="cote" style="left:${xs}px;top:${sol + 8}px">Silhouette de 1,70 m</span>`;
   $('[data-echelle-texte]').textContent = mur ? 'La pièce accrochée au mur, à ses vraies dimensions, à côté d\'une silhouette de 1,70 m.' : console_ ? 'La pièce posée sur une console de 80 cm, à ses vraies dimensions, à côté d\'une silhouette de 1,70 m.' : 'La pièce à ses vraies dimensions, à côté d\'une silhouette de 1,70 m.';
-  if (!calme && !zoneE.dataset.anime) zoneE.dataset.anime = '1', gsap.from($('.objet-echelle', zoneE), { y: -60, opacity: 0, duration: 1.2, ease: 'bounce.out', scrollTrigger: { trigger: zoneE, start: 'top 70%', once: true } });
+  if (!calme && !zoneE.dataset.anime) zoneE.dataset.anime = '1', gsap.from($('.objet-echelle', zoneE), { y: -60, opacity: 0, duration: 1.2, ease: 'bounce.out', scrollTrigger: { trigger: zoneE, start: 'top 88%', once: true } });
 }
 echelle();
 let minuterieEchelle;

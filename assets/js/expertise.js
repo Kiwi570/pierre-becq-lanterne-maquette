@@ -19,13 +19,13 @@ $('[data-mono]').innerHTML = PB.monoSVG('mono');
 
 /* ---------- le rapport se compose ---------- */
 if (!calme) {
-  const tl = gsap.timeline({ scrollTrigger: { trigger: '[data-rapport]', start: 'top 72%', once: true } });
+  const tl = gsap.timeline({ scrollTrigger: { trigger: '[data-rapport]', start: 'top 85%', once: true } });
   tl.from('.rapport', { y: 80, rotation: 6, opacity: 0, duration: 1.1, ease: 'power3.out' })
     .from($$('.rapport-ligne'), { x: -30, opacity: 0, duration: 0.6, stagger: 0.18, ease: 'power2.out' }, 0.5)
     .from($$('.rapport .lignes i'), { scaleX: 0, transformOrigin: 'left', duration: 0.5, stagger: 0.03 }, 0.6)
     .from('.tampon', { scale: 2.6, opacity: 0, rotation: -30, duration: 0.45, ease: 'back.out(2.5)' }, 1.6);
-  gsap.from($$('[data-etapes] li'), { opacity: 0, x: -30, duration: 0.8, ease: 'power3.out', stagger: 0.18, scrollTrigger: { trigger: '[data-etapes]', start: 'top 80%', once: true } });
-  gsap.from($$('.logos-titres img'), { scale: 0.6, opacity: 0, rotation: -20, duration: 0.9, ease: 'back.out(2)', stagger: 0.15, scrollTrigger: { trigger: '.logos-titres', start: 'top 85%', once: true } });
+  gsap.from($$('[data-etapes] li'), { opacity: 0, x: -30, duration: 0.8, ease: 'power3.out', stagger: 0.18, scrollTrigger: { trigger: '[data-etapes]', start: 'top 92%', once: true } });
+  gsap.from($$('.logos-titres img'), { scale: 0.6, opacity: 0, rotation: -20, duration: 0.9, ease: 'back.out(2)', stagger: 0.15, scrollTrigger: { trigger: '.logos-titres', start: 'top 94%', once: true } });
 }
 
 /* ---------- formulaire en quatre etapes ---------- */

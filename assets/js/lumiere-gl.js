@@ -122,7 +122,9 @@ export function fondLanterne(conteneur, { image, imageMobile, vitrail = 'assets/
   const boucle = () => {
     if (!visible) return;
     const t = (performance.now() - t0) / 1000;
-    if (!souris || matchMedia('(pointer: coarse)').matches) { cible.x = w * (0.55 + Math.sin(t * 0.21) * 0.3); cible.y = h * (0.42 + Math.cos(t * 0.16) * 0.22); }
+    const tilt = window.__pbTilt;
+    if (tilt && matchMedia('(pointer: coarse)').matches) { cible.x = w * (0.5 + tilt.x * 0.38); cible.y = h * (0.42 + tilt.y * 0.3); }
+    else if (!souris || matchMedia('(pointer: coarse)').matches) { cible.x = w * (0.55 + Math.sin(t * 0.21) * 0.3); cible.y = h * (0.42 + Math.cos(t * 0.16) * 0.22); }
     lum.x += (cible.x - lum.x) * 0.07; lum.y += (cible.y - lum.y) * 0.07;
     program.uniforms.uLum.value = [lum.x * renderer.dpr, (h - lum.y) * renderer.dpr];
     program.uniforms.uTemps.value = t;
@@ -173,7 +175,9 @@ export function fondLoupe(conteneur, { image, imageMobile } = {}) {
   const boucle = () => {
     if (!visible) return;
     const t = (performance.now() - t0) / 1000;
-    if (!souris || matchMedia('(pointer: coarse)').matches) { cible.x = w * (0.62 + Math.sin(t * 0.3) * 0.22); cible.y = h * (0.5 + Math.cos(t * 0.23) * 0.22); }
+    const tilt = window.__pbTilt;
+    if (tilt && matchMedia('(pointer: coarse)').matches) { cible.x = w * (0.55 + tilt.x * 0.35); cible.y = h * (0.5 + tilt.y * 0.3); }
+    else if (!souris || matchMedia('(pointer: coarse)').matches) { cible.x = w * (0.62 + Math.sin(t * 0.3) * 0.22); cible.y = h * (0.5 + Math.cos(t * 0.23) * 0.22); }
     lum.x += (cible.x - lum.x) * 0.09; lum.y += (cible.y - lum.y) * 0.09;
     program.uniforms.uLum.value = [lum.x * renderer.dpr, (h - lum.y) * renderer.dpr];
     renderer.render({ scene: mesh });

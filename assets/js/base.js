@@ -322,9 +322,20 @@ PB.aimants = (racine = document) => {
 };
 
 /* avant de remplacer des cartes : on arrete leurs animations d'inclinaison */
-PB.liberer = (racine) => racine.querySelectorAll('[data-tilt]').forEach((el) => { el._tilt?.forEach((q) => q.tween?.kill()); el._tilt = null; gsap.killTweensOf(el); });
+PB.liberer = (racine) => {
+  racine.querySelectorAll('[data-tilt]').forEach((el) => { el._tilt?.forEach((q) => q.tween?.kill()); el._tilt = null; gsap.killTweensOf(el); });
+  ScrollTrigger.getAll().forEach((st) => { if (st.trigger && st.trigger !== racine && racine.contains(st.trigger)) st.kill(); });
+};
 PB.inclinaison = (racine = document) => {
-  if (!pointeurFin || calme) return;
+  if (calme) return;
+  if (!pointeurFin) {
+    // ecran tactile : la lumiere balaie le velours de chaque carte quand elle arrive a l'ecran
+    racine.querySelectorAll('[data-tilt] .carte-visuel').forEach((vis) => {
+      if (vis.dataset.balaye) return; vis.dataset.balaye = '1';
+      ScrollTrigger.create({ trigger: vis, start: 'top 88%', once: true, onEnter: () => gsap.fromTo(vis, { '--mx': '12%', '--my': '18%' }, { '--mx': '58%', '--my': '38%', duration: 1.8, ease: 'power2.out' }) });
+    });
+    return;
+  }
   racine.querySelectorAll('[data-tilt]').forEach((el) => {
     if (el.dataset.tiltOk) return;
     el.dataset.tiltOk = '1';
@@ -357,7 +368,7 @@ PB.balancer = (racine = document) => {
 };
 
 /* ---------- dorure a la feuille ---------- */
-PB.dorer = (racine = document, { debut = 'top 86%', delai = 0 } = {}) => {
+PB.dorer = (racine = document, { debut = 'top 93%', delai = 0 } = {}) => {
   racine.querySelectorAll('[data-dorure]').forEach((el) => {
     if (el.dataset.dorOk) return;
     el.dataset.dorOk = '1';
@@ -375,7 +386,7 @@ PB.dorer = (racine = document, { debut = 'top 86%', delai = 0 } = {}) => {
       .fromTo(mots, { backgroundPosition: '0px 0px, 100% 0%' }, { backgroundPosition: '60px 0px, 0% 0%', duration: 2.4, ease: 'power2.out', stagger: 0.09 }, 0);
     el._dorure = tl;
     if (el.closest('.entree')) { PB.pret.then(() => tl.play()); return; }
-    ScrollTrigger.create({ trigger: el, start: PB.etroit() && debut === 'top 86%' ? 'top 96%' : debut, once: true, onEnter: () => tl.play() });
+    ScrollTrigger.create({ trigger: el, start: PB.etroit() && debut === 'top 93%' ? 'top 97%' : debut, once: true, onEnter: () => tl.play() });
   });
 };
 
@@ -692,8 +703,27 @@ function monterPied() {
   const zone = document.querySelector('[data-grand-nom]');
   if (!zone) return;
   const [x0, y0, x1, y1] = NOM.bbox;
-  zone.innerHTML = `<svg viewBox="${x0 - 4} ${y0 - 4} ${x1 - x0 + 8} ${y1 - y0 + 8}" role="img" aria-label="Pierre Becq">${NOM.paths.map((d) => `<path d="${d}"/>`).join('')}</svg>`;
-  const chemins = zone.querySelectorAll('path');
+  const traces = NOM.paths.map((d) => `<path d="${d}"/>`).join('');
+  // le nom, puis une seconde couche doree eclairee la ou passe la flamme
+  zone.innerHTML = `<svg viewBox="${x0 - 4} ${y0 - 4} ${x1 - x0 + 8} ${y1 - y0 + 8}" role="img" aria-label="Pierre Becq"><defs><radialGradient id="lueur-nom" gradientUnits="userSpaceOnUse" cx="${x0 - 200}" cy="${(y0 + y1) / 2}" r="${(x1 - x0) * 0.16}"><stop offset="0" stop-color="#fbe9b6" stop-opacity=".95"/><stop offset=".45" stop-color="#d9b46a" stop-opacity=".55"/><stop offset="1" stop-color="#c9a35b" stop-opacity="0"/></radialGradient></defs><g class="nom-trace">${traces}</g><g class="nom-lueur" aria-hidden="true">${traces}</g></svg>`;
+  const chemins = zone.querySelectorAll('.nom-trace path');
+  if (!calme) {
+    const svg = zone.querySelector('svg'); const grad = zone.querySelector('#lueur-nom');
+    const pos = { x: x0 - 200, y: (y0 + y1) / 2 };
+    const appliquer = () => { grad.setAttribute('cx', pos.x.toFixed(1)); grad.setAttribute('cy', pos.y.toFixed(1)); };
+    const vers = (cx, cy) => {
+      const m = svg.getScreenCTM(); if (!m) return;
+      const pt = new DOMPoint(cx, cy).matrixTransform(m.inverse());
+      gsap.to(pos, { x: pt.x, y: pt.y, duration: 0.6, ease: 'power3.out', overwrite: true, onUpdate: appliquer });
+    };
+    zone.addEventListener('pointermove', (e) => vers(e.clientX, e.clientY));
+    zone.addEventListener('pointerdown', (e) => vers(e.clientX, e.clientY));
+    // sans souris, la lueur traverse le nom quand il entre a l'ecran
+    ScrollTrigger.create({ trigger: zone, start: 'top 85%', end: 'bottom top', onEnter: () => {
+      if (pointeurFin) return;
+      gsap.fromTo(pos, { x: x0 - 120 }, { x: x1 + 120, duration: 3.2, ease: 'sine.inOut', delay: 0.6, repeat: 1, yoyo: true, onUpdate: appliquer });
+    } });
+  }
   if (calme) { chemins.forEach((p) => { p.style.fill = 'rgba(201,163,91,.18)'; }); return; }
   chemins.forEach((p) => { const l = p.getTotalLength(); p.style.strokeDasharray = l; p.style.strokeDashoffset = l; });
   gsap.timeline({ scrollTrigger: { trigger: zone, start: 'top 98%', once: true } })
@@ -737,8 +767,20 @@ function monterFocusVisible() {
     }
   });
 }
+/* telephone Android : la lumiere suit l'inclinaison de l'appareil (sans demande d'autorisation ; rien sur iPhone) */
+function monterInclinaisonAppareil() {
+  if (calme || pointeurFin || !window.DeviceOrientationEvent || typeof DeviceOrientationEvent.requestPermission === 'function') return;
+  let base = null;
+  addEventListener('deviceorientation', (e) => {
+    if (e.gamma == null || e.beta == null) return;
+    if (!base) base = { b: e.beta };
+    const x = gsap.utils.clamp(-1, 1, e.gamma / 30); const y = gsap.utils.clamp(-1, 1, (e.beta - base.b) / 30);
+    window.__pbTilt = { x, y };
+  }, { passive: true });
+}
 export function demarrer() {
   monterChrome();
+  monterInclinaisonAppareil();
   monterFocusVisible();
   monterTypo();
   monterDefilement();

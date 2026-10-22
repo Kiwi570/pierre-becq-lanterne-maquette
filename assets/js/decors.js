@@ -48,10 +48,12 @@ export function construireMarqueteries() {
     const polys = $$('polygon', svg);
     gsap.from(polys, {
       x: () => gsap.utils.random(-90, 90), y: () => gsap.utils.random(-90, 90), rotation: () => gsap.utils.random(-120, 120), opacity: 0, transformOrigin: '50% 50%',
-      duration: 1.3, ease: 'expo.out', stagger: { each: 0.008, from: 'random' }, scrollTrigger: { trigger: svg, start: 'top 85%', once: true },
+      duration: 1.3, ease: 'expo.out', stagger: { each: 0.008, from: 'random' }, scrollTrigger: { trigger: svg, start: 'top 94%', once: true },
     });
   });
-  if (!calme) gsap.from($$('[data-marqueteries] .marqueterie'), { y: 60, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.14, scrollTrigger: { trigger: '[data-marqueteries]', start: 'top 82%', once: true } });
+  // au toucher, la marqueterie tourne d'un cran : les cubes basculent
+  $$('[data-marqueteries] .marqueterie').forEach((m) => m.addEventListener('click', () => { m.classList.toggle('tourne'); PB.son.tic(0.3, true); }));
+  if (!calme) gsap.from($$('[data-marqueteries] .marqueterie'), { y: 60, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.14, scrollTrigger: { trigger: '[data-marqueteries]', start: 'top 92%', once: true } });
 }
 
 /* ---------------- caisse de transport ---------------- */
@@ -63,7 +65,7 @@ export function construireCaisse(svg) {
   let html = `<defs><pattern id="bois-caisse" patternUnits="userSpaceOnUse" width="300" height="300"><image href="${PB.amb('g-bois-cerisier-1x1', 700)}" width="300" height="300" preserveAspectRatio="xMidYMid slice"/></pattern><linearGradient id="relief-planche" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".12" stop-color="#fff" stop-opacity="0"/><stop offset=".8" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient></defs>`;
   for (let i = 0; i < n; i++) {
     const y = (i * hp).toFixed(1); const hh = (hp + 0.6).toFixed(1);
-    html += `<g class="couvercle" data-i="${i}"><rect class="planche${i % 2 ? ' claire' : ''}" x="-2" y="${y}" width="304" height="${hh}"/><rect x="-2" y="${y}" width="304" height="${hh}" fill="url(#bois-caisse)" opacity="${i % 2 ? 0.55 : 0.4}" style="mix-blend-mode:multiply"/><rect x="-2" y="${y}" width="304" height="${hh}" fill="url(#relief-planche)"/><circle class="clou" cx="10" cy="${(i * hp + hp / 2).toFixed(1)}" r="2.4"/><circle class="clou" cx="290" cy="${(i * hp + hp / 2).toFixed(1)}" r="2.4"/></g>`;
+    html += `<g class="couvercle" data-i="${i}"><rect class="planche${i % 2 ? ' claire' : ''}" x="-2" y="${y}" width="304" height="${hh}"/><rect x="-2" y="${y}" width="304" height="${hh}" fill="url(#bois-caisse)" opacity="${i % 2 ? 0.95 : 0.8}" style="mix-blend-mode:multiply"/><rect x="-2" y="${y}" width="304" height="${hh}" fill="url(#relief-planche)"/><circle class="clou" cx="10" cy="${(i * hp + hp / 2).toFixed(1)}" r="2.4"/><circle class="clou" cx="290" cy="${(i * hp + hp / 2).toFixed(1)}" r="2.4"/></g>`;
   }
   svg.innerHTML = html;
   const marque = document.createElement('div');
@@ -72,7 +74,7 @@ export function construireCaisse(svg) {
   svg.parentElement.append(marque);
   if (calme) { svg.style.display = 'none'; return; }
   const couv = $$('.couvercle', svg);
-  const tl = gsap.timeline({ scrollTrigger: { trigger: svg.parentElement, start: 'top 72%', once: true } });
+  const tl = gsap.timeline({ scrollTrigger: { trigger: svg.parentElement, start: 'top 85%', once: true } });
   tl.to($$('.clou', svg), { scale: 0, opacity: 0, transformOrigin: '50% 50%', duration: 0.25, stagger: 0.04, ease: 'power2.in' })
     .to(couv, { xPercent: (i) => (i % 2 ? 110 : -110), rotation: (i) => (i % 2 ? 4 : -4), duration: 1.1, ease: 'power3.inOut', stagger: 0.08 }, 0.4)
     .from(marque, { scale: 1.8, opacity: 0, rotation: -12, duration: 0.5, ease: 'back.out(2.5)' }, 1.3)

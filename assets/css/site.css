@@ -82,6 +82,16 @@ nav.fil { position: relative; z-index: 2; }
 /* ---------- mise en page ---------- */
 .contenu { width: 100%; max-width: 1360px; margin: 0 auto; padding: 0 var(--gouttiere); }
 .contenu.etroit { max-width: 860px; }
+/* grands ecrans : la mise en page s'elargit et les textes grandissent un peu */
+@media (min-width: 1700px) {
+  html { font-size: 17px; }
+  .contenu { max-width: 1560px; }
+  .contenu.etroit { max-width: 920px; }
+}
+@media (min-width: 2200px) {
+  html { font-size: 19px; }
+  .contenu { max-width: 1800px; }
+}
 .section { position: relative; padding: clamp(72px, 9vw, 128px) 0; }
 .intertitre { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 18px 40px; margin-bottom: clamp(36px, 5vw, 64px); }
 .intertitre > * { flex: 1 1 420px; }
@@ -261,18 +271,24 @@ html.intro::before { content: ""; position: fixed; inset: 0; z-index: 294; backg
 
 /* ---------- la maison ---------- */
 .maison-grille { display: grid; grid-template-columns: .7fr 1.2fr 1fr; gap: clamp(30px, 5vw, 80px); align-items: center; }
-.maison-annees { display: grid; justify-items: start; gap: 6px; }
+.maison-annees { display: grid; justify-items: start; gap: 6px; cursor: default; -webkit-tap-highlight-color: transparent; }
 .maison-annees .annee { font-size: clamp(4.5rem, 10vw, 9.5rem); line-height: .9; color: var(--or-clair); font-style: italic; }
 .maison-texte .titre-section { margin-bottom: 26px; font-size: clamp(2rem, 3.6vw, 3.4rem); }
-.maison-photo { position: relative; overflow: hidden; }
+.maison-photo { position: relative; }
+.maison-photo .cadre-photo { position: relative; display: block; overflow: hidden; }
 .maison-photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 30% 50%; }
-.maison-photo figcaption { margin-top: 10px; }
+.maison-photo figcaption { margin-top: 12px; color: var(--ivoire-3); }
 .cachets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; margin-top: clamp(60px, 8vw, 110px); }
 .cachet { position: relative; display: grid; justify-items: center; text-align: center; gap: 4px; padding-top: 112px; font-size: var(--t-s); color: var(--ivoire-2); }
 .cachet strong { font-family: var(--f-display); font-style: italic; font-weight: 400; font-size: 1.12rem; color: var(--ivoire); line-height: 1.2; min-height: 2.4em; display: grid; align-content: end; text-wrap: balance; }
 .cachet .cire { position: absolute; top: 0; left: 50%; width: 92px; height: 92px; margin-left: -46px; background: radial-gradient(circle at 38% 32%, #c4473f, #8b2023 46%, #5a1214 80%); border-radius: 48% 52% 47% 53% / 52% 46% 54% 48%; box-shadow: inset -6px -8px 14px rgba(0,0,0,.45), inset 5px 6px 10px rgba(255,140,120,.25), 0 10px 18px rgba(0,0,0,.5); }
 .cachet .cire::before { content: ""; position: absolute; inset: 16px; border-radius: 50%; border: 1.5px solid rgba(60,8,10,.55); box-shadow: 0 1px 0 rgba(255,150,130,.25), inset 0 1px 0 rgba(255,150,130,.18); }
 .cachet .cire::after { content: none; }
+.cachet { cursor: default; -webkit-tap-highlight-color: transparent; }
+.cachet .cire { transition: transform .4s var(--ease), box-shadow .4s var(--ease); }
+@media (hover: hover) { .cachet:hover .cire { transform: translateY(3px) scale(.95) rotate(-6deg); box-shadow: inset -6px -8px 14px rgba(0,0,0,.5), inset 5px 6px 10px rgba(255,140,120,.22), 0 4px 8px rgba(0,0,0,.55); } }
+.cachet .cire.presse { animation: presse .55s var(--ease); }
+@keyframes presse { 0% { transform: scale(1); } 30% { transform: translateY(4px) scale(.88) rotate(-8deg); box-shadow: inset -6px -8px 14px rgba(0,0,0,.5), 0 2px 4px rgba(0,0,0,.6); } 100% { transform: scale(1); } }
 .cachet .empreinte { position: absolute; inset: 25%; width: 50%; height: 50%; fill: none; stroke: rgba(52,7,9,.78); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 0 rgba(255,150,130,.32)) drop-shadow(0 -1px 0 rgba(30,0,2,.35)); }
 .logos-titres { display: flex; align-items: center; gap: 28px; margin-top: 50px; justify-content: center; }
 .logos-titres img { width: 84px; height: 84px; object-fit: contain; border-radius: 50%; background: #fff; padding: 6px; opacity: .92; }
@@ -301,7 +317,7 @@ html.intro::before { content: ""; position: fixed; inset: 0; z-index: 294; backg
 .cadre-dore { position: relative; z-index: 1; display: inline-block; line-height: 0; padding: 10px; background: linear-gradient(135deg, #6e5124, #e2c27f 22%, #9b7637 45%, #f2dca6 60%, #8d6b33 80%, #c9a35b); box-shadow: 0 24px 40px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,240,200,.4); }
 img.vp { width: var(--w); height: auto; max-width: none; }
 .cadre-dore img { display: block; box-shadow: inset 0 0 0 1px rgba(0,0,0,.4); filter: none; }
-.piece .etiquette { margin-top: 26px; }
+.piece .etiquette { margin-top: 26px; rotate: calc(var(--balan, 0) * 1deg) !important; }
 .piece-actions { display: flex; gap: 8px; margin-top: 12px; }
 .ajout { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid rgba(201,163,91,.4); font-size: var(--t-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--ivoire-2); transition: all .3s; }
 .ajout:hover { border-color: var(--or); color: var(--ivoire); }
@@ -377,7 +393,9 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .frise-v-visuel { position: relative; display: grid; place-items: end start; max-width: 46vw; }
 .frise-v-visuel img.vp { max-width: 100%; filter: drop-shadow(0 14px 18px rgba(0,0,0,.6)); }
 .frise-v-visuel .cadre-dore { padding: 6px; max-width: 100%; }
-.frise-v-visuel::before { content: ""; position: absolute; inset: -20% -30%; background: radial-gradient(closest-side, rgba(232,190,120,.22), transparent); opacity: 0; transition: opacity .6s; }
+.frise-v-visuel::before { content: ""; position: absolute; inset: -20% -30%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgba(232,190,120,.22), transparent); opacity: 0; transition: opacity .6s; }
+.frise-v-visuel { isolation: isolate; }
+.frise-v-texte { position: relative; z-index: 1; }
 .frise-v-piece.au-balancier .frise-v-visuel::before { opacity: 1; }
 .frise-v-texte { display: grid; gap: 6px; padding-bottom: 6px; }
 .frise-v-texte .date { font-size: 12px; letter-spacing: .1em; color: var(--or-clair); }
@@ -401,7 +419,7 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .vitrine-texte h3 { font-family: var(--f-display); font-style: italic; font-size: var(--t-xl); margin-bottom: 10px; }
 .vitrine-texte p { color: var(--ivoire-2); max-width: 54ch; }
 .verre .matiere-fond img { filter: none; }
-.verre canvas.gravure { position: absolute; z-index: 2; pointer-events: none; }
+.verre canvas.gravure { position: absolute; z-index: 2; pointer-events: none; filter: drop-shadow(0 20px 26px rgba(0,0,0,.7)); }
 
 /* ---------- marqueterie ---------- */
 .expertise-accueil { overflow: hidden; }
@@ -411,7 +429,9 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .expertise-accueil, .entree--galerie { isolation: isolate; }
 .marqueteries { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 28px); }
 .marqueterie { position: relative; padding: 30px 28px 34px; background: rgba(18,16,13,.82); border: 1px solid rgba(201,163,91,.24); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.marqueterie .placage { width: 96px; height: 96px; margin-bottom: 24px; overflow: visible; }
+.marqueterie .placage { width: 96px; height: 96px; margin-bottom: 24px; overflow: visible; transition: transform 1.4s cubic-bezier(.3, 1.4, .4, 1); }
+@media (hover: hover) { .marqueterie:hover .placage { transform: rotate(60deg); } }
+.marqueterie.tourne .placage { transform: rotate(120deg); }
 .marqueterie h3 { font-family: var(--f-display); font-style: italic; font-size: 1.6rem; line-height: 1.15; margin-bottom: 12px; }
 .marqueterie p { color: var(--ivoire-2); font-size: var(--t-s); }
 .marqueterie .sur-titre { margin-bottom: 8px; }
@@ -425,8 +445,8 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .marquage-caisse { position: absolute; right: 6%; top: 8%; display: grid; justify-items: center; gap: 2px; padding: 10px 18px; border: 2px solid rgba(232,205,146,.75); color: rgba(232,205,146,.9); transform: rotate(-6deg); background: rgba(11,9,8,.35); }
 .marquage-caisse span { font-family: var(--f-display); font-style: italic; font-size: 1.5rem; line-height: 1; }
 .marquage-caisse small { font-size: 10px; letter-spacing: .3em; text-transform: uppercase; }
-.caisse .planche { fill: #8a6236; stroke: #3b2612; stroke-width: 1.2; }
-.caisse .planche.claire { fill: #a87a47; }
+.caisse .planche { fill: #9c7444; stroke: #2a1a0b; stroke-width: 1.6; }
+.caisse .planche.claire { fill: #b4875a; }
 .caisse .clou { fill: #2b2a28; stroke: #b9b3a6; stroke-width: .6; }
 .caisse .tampon-c { fill: none; stroke: rgba(40,12,8,.7); stroke-width: 2; }
 .caisse text { font-family: var(--f-texte); font-size: 11px; letter-spacing: 2px; fill: rgba(40,12,8,.75); font-weight: 600; }
@@ -532,10 +552,13 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .recap strong { color: var(--or-clair); font-weight: 450; }
 
 /* ---------- pied ---------- */
-.pied { position: relative; padding: clamp(60px, 9vw, 120px) 0 40px; border-top: 1px solid rgba(201,163,91,.14); background: linear-gradient(var(--laque-0), #070605); }
+.pied { position: relative; padding: clamp(60px, 9vw, 120px) 0 calc(40px + var(--barre-bas, 0px)); border-top: 1px solid rgba(201,163,91,.14); background: linear-gradient(var(--laque-0), #070605); }
 .grand-nom { padding: 0 var(--gouttiere); margin-bottom: 50px; }
 .grand-nom svg { width: 100%; height: auto; overflow: visible; }
-.grand-nom path { fill: transparent; stroke: rgba(201,163,91,.55); stroke-width: .5; }
+.grand-nom .nom-trace path { fill: transparent; stroke: rgba(201,163,91,.55); stroke-width: .5; }
+.grand-nom .nom-lueur path { fill: url(#lueur-nom); stroke: none; pointer-events: none; }
+.grand-nom { -webkit-tap-highlight-color: transparent; }
+html.calme .grand-nom .nom-lueur { display: none; }
 .pied-bas { display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 26px 40px; align-items: start; font-size: var(--t-s); color: var(--ivoire-2); }
 .pied-bas nav, .pied-bas .reseaux { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: flex-start; align-content: flex-start; }
 .pied-coord { line-height: 1.8; }
@@ -579,8 +602,8 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .carte-texte { display: grid; gap: 4px; padding: 18px 20px 20px; }
 .carte-texte .t { font-family: var(--f-display); font-style: italic; font-size: 1.22rem; line-height: 1.2; }
 .carte-texte .e { font-size: var(--t-xs); color: var(--ivoire-3); }
-.carte-texte .bas { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
-.carte-texte .p { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--or); white-space: nowrap; }
+.carte-texte .bas { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
+.carte-texte .p { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--or); line-height: 1.4; }
 .carte .lien-carte { position: absolute; inset: 0; z-index: 1; }
 .carte .ajout { position: relative; z-index: 2; }
 .badge-lorraine { position: absolute; top: 14px; left: 14px; z-index: 2; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; padding: 5px 9px; background: rgba(11,9,8,.7); border: 1px solid rgba(201,163,91,.4); color: var(--or-clair); }
@@ -784,6 +807,9 @@ html.attente main { opacity: 0; animation: montrer 0s 2.5s forwards; }
   .vitrine-lorraine { min-height: 560px; }
 }
 @media (max-width: 520px) {
+  .famille-grille { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 calc(-1 * var(--gouttiere)); padding: 0 var(--gouttiere) 10px; scrollbar-width: none; }
+  .famille-grille::-webkit-scrollbar { display: none; }
+  .famille-grille > .carte { flex: 0 0 74%; scroll-snap-align: center; }
   .marqueteries { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 calc(-1 * var(--gouttiere)); padding: 0 var(--gouttiere) 8px; scrollbar-width: none; }
   .marqueteries::-webkit-scrollbar { display: none; }
   .marqueterie { flex: 0 0 84%; scroll-snap-align: center; }
