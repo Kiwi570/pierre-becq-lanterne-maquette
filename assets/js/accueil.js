@@ -2,7 +2,7 @@
 import PB, { demarrer } from './base.js';
 import { fondLanterne } from './lumiere-gl.js';
 import { FRANCE } from './formes.js';
-import { pieceSalle, visuelPiece, hauteurRelative } from './cartes.js';
+import { pieceSalle, visuelPiece, hauteurRelative, largeurPiece, hauteurPourLargeur } from './cartes.js';
 import { construireMarqueteries, construireCaisse } from './decors.js';
 
 demarrer();
@@ -61,7 +61,9 @@ const hauteurSalle = () => {
 };
 const rendreSalle = () => {
   const H = hauteurSalle();
-  piste.innerHTML = PB.objets.map((x) => pieceSalle(x, hauteurRelative(x, H, H * 0.42))).join('');
+  // sur telephone, chaque piece tient entiere dans la largeur de l'ecran
+  const limite = (x, h) => (bureau() ? h : Math.min(h, hauteurPourLargeur(x, innerWidth - 56)));
+  piste.innerHTML = PB.objets.map((x) => pieceSalle(x, Math.round(limite(x, hauteurRelative(x, H, H * 0.42))))).join('');
   PB.majSelection(piste); PB.balancer(piste);
 };
 rendreSalle();
@@ -77,8 +79,20 @@ function animerSalle() {
   colorer(pieces[0]);
   if (!bureau()) {
     const zone = $('.salle-piste-zone');
-    const io = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) colorer(en.target); }), { root: zone, threshold: 0.6 });
+    // compteur, titre et barre d'avancement sous la salle ; images chargees avant le premier geste
+    zone.insertAdjacentHTML('afterend', `<div class="hud-salle hud-salle--mobile" aria-hidden="true"><span class="chiffres" data-hud-n>1 / ${pieces.length}</span><strong data-hud-t>${PB.esc(PB.objets[0].titre)}</strong><span class="barre"><i data-hud-barre></i></span></div><p class="mini indice-glisser indice-salle" aria-hidden="true">Faites glisser les pièces →</p>`);
+    const hudN = $('[data-hud-n]', sec); const hudT = $('[data-hud-t]', sec); const hudB = $('[data-hud-barre]', sec);
+    new IntersectionObserver(([en], obs) => { if (en.isIntersecting) { $$('img[loading="lazy"]', piste).forEach((i) => { i.loading = 'eager'; }); obs.disconnect(); } }, { rootMargin: '900px 0px' }).observe(sec);
+    const io = new IntersectionObserver((es) => es.forEach((en) => {
+      if (!en.isIntersecting) return;
+      colorer(en.target); const k = pieces.indexOf(en.target);
+      hudN.textContent = `${k + 1} / ${pieces.length}`; hudT.textContent = PB.objets[k].titre;
+    }), { root: zone, threshold: 0.6 });
     pieces.forEach((p) => io.observe(p));
+    zone.addEventListener('scroll', () => {
+      const m = zone.scrollWidth - zone.clientWidth; hudB.style.transform = `scaleX(${m > 0 ? zone.scrollLeft / m : 0})`;
+      $('.indice-salle', sec)?.classList.add('vu');
+    }, { passive: true });
     return;
   }
   const distance = () => piste.scrollWidth - innerWidth;
@@ -113,16 +127,47 @@ function animerSalle() {
 
 /* ---------------- 4. frise des siecles ---------------- */
 const DEBUT = 1670; const FIN = 2000;
+/* sur telephone : frise verticale, au fil du defilement, avec un balancier qui reste au milieu de l'ecran */
+function construireFriseVerticale() {
+  const scene = $('[data-frise]'); const pisteF = $('[data-frise-piste]');
+  const anneeTete = $('[data-frise-annee]'); anneeTete.hidden = true;
+  $('#frise').classList.add('est-verticale');
+  const triees = [...PB.objets].sort((a, b) => a.annee - b.annee);
+  const siecleDe = (a) => (a <= 1700 ? 'XVIIe' : a <= 1800 ? 'XVIIIe' : a <= 1900 ? 'XIXe' : 'XXe');
+  let html = `<div class="frise-v-aiguille" aria-hidden="true"><b></b><span class="chiffres" data-frise-v-annee>${triees[0].annee}</span></div><ol class="frise-v">`;
+  let siecle = '';
+  triees.forEach((x) => {
+    const sc = siecleDe(x.annee);
+    if (sc !== siecle) { siecle = sc; html += `<li class="frise-v-siecle" aria-hidden="true"><span class="dore">${sc}</span> siècle</li>`; }
+    html += `<li class="frise-v-piece" data-annee="${x.annee}"><a href="${PB.lien(x)}" data-carte aria-label="${PB.esc(x.titre)}, ${PB.esc(x.epoque)}"><span class="frise-v-visuel">${visuelPiece(x, { hauteur: Math.round(hauteurRelative(x, 170, 120)) })}</span><span class="frise-v-texte"><span class="date">${PB.esc(x.epoque)}</span><span class="t">${PB.esc(x.titre)}</span></span></a></li>`;
+  });
+  html += `</ol><a class="frise-fin frise-fin--v" href="galerie.html"><span class="mini">Les ${PB.objets.length} pièces</span><strong>Toute la galerie</strong>${PB.ICO.fleche}</a>`;
+  pisteF.innerHTML = html;
+  const an = $('[data-frise-v-annee]', pisteF);
+  let active = null;
+  const items = $$('.frise-v-piece', pisteF);
+  const io = new IntersectionObserver((es) => es.forEach((en) => {
+    if (!en.isIntersecting) return;
+    const li = en.target; an.textContent = li.dataset.annee;
+    if (active !== li) { active?.classList.remove('au-balancier'); li.classList.add('au-balancier'); active = li; PB.son.tic(0.22, true); }
+  }), { rootMargin: '-48% 0px -48% 0px' });
+  items.forEach((li) => io.observe(li));
+  if (calme) return;
+  items.forEach((li) => gsap.from($('a', li), { x: 40, opacity: 0, duration: 0.9, ease: 'expo.out', scrollTrigger: { trigger: li, start: 'top 88%', once: true } }));
+  gsap.from($$('.frise-v-siecle', pisteF), { opacity: 0, x: -20, duration: 0.8, ease: 'power3.out', stagger: 0, scrollTrigger: { trigger: pisteF, start: 'top 85%', once: true } });
+}
+
 function construireFrise() {
+  if (PB.etroit()) { construireFriseVerticale(); return; }
   const scene = $('[data-frise]'); const pisteF = $('[data-frise-piste]');
   const k = bureau() ? Math.max(9, innerWidth / 110) : 11; // pixels par annee
   const marge = bureau() ? innerWidth * 0.5 : 60;
   const X = (a) => marge + (a - DEBUT) * k;
-  const largeur = X(FIN) + marge;
+  const largeur = X(FIN) + marge + (bureau() ? 0 : 300);
   const triees = [...PB.objets].sort((a, b) => a.annee - b.annee);
   let html = '<div class="frise-axe"></div>';
   for (let a = 1680; a <= FIN; a += 10) html += `<span class="frise-tic${a % 50 === 0 ? ' decennie' : ''}" style="left:${X(a)}px">${a % 50 === 0 ? `<span class="chiffres">${a}</span>` : ''}</span>`;
-  [['XVIIe', 1670, 1700], ['XVIIIe', 1701, 1800], ['XIXe', 1801, 1900], ['XXe', 1901, 2000]].forEach(([n, a]) => { html += `<span class="frise-siecle dore" style="left:${X(Math.max(a, DEBUT)) + 6}px">${n}<span class="sr"> siècle</span></span>`; });
+  [['XVIIe', 1670, 1700], ['XVIIIe', 1701, 1800], ['XIXe', 1801, 1900], ['XXe', 1901, 2000]].forEach(([n, a]) => { html += `<span class="frise-siecle dore" style="left:${X(Math.max(a, DEBUT)) + 8}px">${n}<span class="sr"> siècle</span></span>`; });
   const anneeEl0 = $('[data-frise-annee]');
   $('.frise-tete').append(anneeEl0);
   if (bureau()) $('#frise').classList.add('est-epinglee');
@@ -133,8 +178,19 @@ function construireFrise() {
     html += `<a class="frise-piece ${pos}" href="${PB.lien(x)}" data-carte data-annee="${x.annee}" style="left:${X(x.annee)}px" aria-label="${PB.esc(x.titre)}, ${PB.esc(x.epoque)}">
       ${visuelPiece(x, { hauteur: hauteurRelative(x, Hh, Hh * 0.72) })}<span class="date">${PB.esc(x.epoque)}</span><span class="t">${PB.esc(x.titre)}</span></a>`;
   });
+  html += `<a class="frise-fin" href="galerie.html" style="left:${X(FIN) + (bureau() ? innerWidth * 0.2 : 70)}px"><span class="mini">Les ${PB.objets.length} pièces</span><strong>Toute la galerie</strong>${PB.ICO.fleche}</a>`;
   pisteF.innerHTML = html;
   pisteF.style.width = `${largeur}px`;
+  // les noms de siecle s'ecartent des fils des pieces du bas et des millesimes
+  const obstacles = [
+    ...triees.filter((x, i) => i % 2).map((x) => [X(x.annee) - 2, X(x.annee) + 2]),
+    ...[...Array(Math.floor((FIN - 1680) / 50) + 1)].map((_, n) => 1700 + n * 50).filter((a) => a <= FIN).map((a) => [X(a) + 4, X(a) + 44]),
+  ];
+  $$('.frise-siecle', pisteF).forEach((el) => {
+    const w = el.offsetWidth; let g = parseFloat(el.style.left); let bouge = true; let n = 0;
+    while (bouge && n++ < 12) { bouge = false; obstacles.forEach(([a, z]) => { if (g < z + 8 && g + w > a - 8) { g = z + 10; bouge = true; } }); }
+    el.style.left = `${g}px`;
+  });
   const anneeEl = $('[data-frise-annee]');
   if (!bureau()) {
     scene.style.overflowX = 'auto'; scene.style.height = `${(Hh + 90) * 2 + 80}px`;
@@ -147,11 +203,18 @@ function construireFrise() {
   const st = ScrollTrigger.create({
     trigger: '#frise', start: 'top top', end: () => `+=${dist()}`, pin: true, scrub: 0.8, animation: tw, invalidateOnRefresh: true, anticipatePin: 1,
   });
+  const piecesF = $$('.frise-piece', pisteF).map((p) => [p, parseFloat(p.style.left)]);
+  let active = null;
   tw.eventCallback('onUpdate', () => {
     const x = -gsap.getProperty(pisteF, 'x') + innerWidth / 2;
     anneeEl.textContent = Math.max(DEBUT, Math.min(FIN, Math.round(DEBUT + (x - marge) / k)));
+    // la piece sous le balancier s'eclaire, un tic si le son est actif
+    let p = null; let bd = 70;
+    piecesF.forEach(([el, px]) => { const d = Math.abs(px - x); if (d < bd) { bd = d; p = el; } });
+    if (p !== active) { active?.classList.remove('au-balancier'); p?.classList.add('au-balancier'); if (p) PB.son.tic(0.22, true); active = p; }
   });
-  gsap.to('.frise-pendule', { rotation: 2.5, transformOrigin: '50% 0%', duration: 1, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  const balancier = gsap.to('.frise-pendule', { rotation: 2.5, transformOrigin: '50% 0%', duration: 1, ease: 'sine.inOut', yoyo: true, repeat: -1, paused: true });
+  ScrollTrigger.create({ trigger: '#frise', start: 'top bottom', end: 'bottom top', onToggle: (s) => (s.isActive ? balancier.play() : balancier.pause()) });
   $$('.frise-piece', pisteF).forEach((p) => {
     const haut = p.classList.contains('haut');
     gsap.fromTo(p, { y: haut ? -160 : 160, opacity: 0 }, { y: 0, opacity: 1, ease: 'bounce.out', duration: 1, scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 62%', toggleActions: 'play none none reverse' } });
@@ -162,6 +225,8 @@ function construireFrise() {
     const y = st.start + (st.end - st.start) * pr;
     if (PB.lenis) PB.lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
     ScrollTrigger.update(); st.getTween?.()?.progress(1); ScrollTrigger.update();
+    // la piece qui recoit le focus est montree tout de suite, sans attendre son entree animee
+    gsap.getTweensOf(p).forEach((t) => t.progress(1)); gsap.set(p, { opacity: 1, y: 0 });
   });
 }
 
@@ -169,9 +234,10 @@ function construireFrise() {
 function construireLorraine() {
   const bois = ['christ-sainte-lucie', 'coffret-sainte-lucie', 'coffret-circulaire'].map(o);
   const Hb = PB.etroit() ? 170 : 260;
-  $('[data-pieces-bois]').innerHTML = bois.map((x) => `<a href="${PB.lien(x)}" data-curseur="Voir" aria-label="${PB.esc(x.titre)}">${visuelPiece(x, { hauteur: x.id === 'christ-sainte-lucie' ? Hb * 1.25 : Math.round(Hb * 0.55) })}</a>`).join('');
+  $('[data-pieces-bois]').innerHTML = bois.map((x) => { const hb = x.id === 'christ-sainte-lucie' ? Hb * 1.25 : Math.round(Hb * 0.55); return `<a href="${PB.lien(x)}" data-curseur="Voir" aria-label="${PB.esc(x.titre)}" style="flex:0 1 ${largeurPiece(x, hb)}px">${visuelPiece(x, { hauteur: hb })}</a>`; }).join('');
   const daum = o('vase-daum');
-  $('[data-pieces-verre]').innerHTML = `<a href="${PB.lien(daum)}" data-curseur="Voir" aria-label="${PB.esc(daum.titre)}">${visuelPiece(daum, { hauteur: PB.etroit() ? 260 : 380 })}</a>`;
+  const hd = PB.etroit() ? 260 : 380;
+  $('[data-pieces-verre]').innerHTML = `<a href="${PB.lien(daum)}" data-curseur="Voir" aria-label="${PB.esc(daum.titre)}" style="flex:0 1 ${largeurPiece(daum, hd)}px">${visuelPiece(daum, { hauteur: hd })}</a>`;
   // veines du bois
   const svg = $('[data-veines]');
   let d = '';
@@ -196,14 +262,17 @@ function construireLorraine() {
     if (!img.complete || !img.naturalWidth) { img.addEventListener('load', lancer, { once: true }); return; }
     const r = img.getBoundingClientRect(); const pr = img.parentElement.getBoundingClientRect();
     const cv = document.createElement('canvas'); cv.className = 'gravure';
-    const W = Math.round(r.width); const H = Math.round(r.height);
-    cv.width = W; cv.height = H; cv.style.left = `${r.left - pr.left}px`; cv.style.top = `${r.top - pr.top}px`; cv.style.width = `${W}px`; cv.style.height = `${H}px`;
+    // a la resolution de l'ecran (2x maxi) : la piece reste nette pendant la gravure
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const Wc = Math.round(r.width); const Hc = Math.round(r.height);
+    const W = Math.round(Wc * dpr); const H = Math.round(Hc * dpr);
+    cv.width = W; cv.height = H; cv.style.left = `${r.left - pr.left}px`; cv.style.top = `${r.top - pr.top}px`; cv.style.width = `${Wc}px`; cv.style.height = `${Hc}px`;
     img.parentElement.style.position = 'relative'; img.parentElement.append(cv);
     const ctx = cv.getContext('2d', { willReadFrequently: true });
     ctx.drawImage(img, 0, 0, W, H);
     const src = ctx.getImageData(0, 0, W, H); const out = ctx.createImageData(W, H);
     const bruit = new Float32Array(W * H);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const n = Math.sin(x * 0.09 + Math.sin(y * 0.05) * 2.2) * 0.25 + Math.sin(y * 0.11 + x * 0.03) * 0.25 + Math.random() * 0.5; bruit[y * W + x] = n * 0.6 + (1 - y / H) * 0.4; }
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const xs = x / dpr; const ys = y / dpr; const n = Math.sin(xs * 0.09 + Math.sin(ys * 0.05) * 2.2) * 0.25 + Math.sin(ys * 0.11 + xs * 0.03) * 0.25 + Math.random() * 0.5; bruit[y * W + x] = n * 0.6 + (1 - y / H) * 0.4; }
     img.style.opacity = '0';
     const etat = { p: 0 };
     gsap.to(etat, {
@@ -228,17 +297,16 @@ function construireCarte() {
   const P = FRANCE.pts;
   const vb = [628, 110, 304, 214];
   const lbl = (pt, t, cls, dx = 10, dy = -8, ancre = 'start') => `<text class="${cls}" x="${pt[0] + dx}" y="${pt[1] + dy}" text-anchor="${ancre}">${t}</text>`;
-  z.innerHTML = `<svg viewBox="${vb.join(' ')}" role="img" aria-label="Carte du nord-est de la France : les boutiques de Metz et de Senon, près des frontières du Luxembourg, de l'Allemagne et de la Belgique">
+  z.innerHTML = `<svg viewBox="${vb.join(' ')}" role="img" aria-label="Carte du nord-est de la France : la boutique de Metz, Nancy et le Luxembourg, près des frontières de l'Allemagne et de la Belgique">
     <path class="pays" d="${FRANCE.d}"/>
     <path class="route" d="M${P.metz[0]},${P.metz[1]} Q${P.metz[0] + 6},${P.metz[1] - 30} ${P.luxembourg[0]},${P.luxembourg[1]}"/>
-    <path class="route" d="M${P.metz[0]},${P.metz[1]} Q${P.metz[0] + 40},${P.metz[1] - 14} ${P.allemagne[0]},${P.allemagne[1]}"/>
-    <path class="route" d="M${P.metz[0]},${P.metz[1]} Q${P.metz[0] - 50},${P.metz[1] - 50} ${P.belgique[0]},${P.belgique[1]}"/>
+    <path class="route" d="M${P.metz[0]},${P.metz[1]} Q${P.metz[0] + 12},${P.metz[1] + 22} ${P.nancy[0]},${P.nancy[1]}"/>
     <circle class="halo" cx="${P.metz[0]}" cy="${P.metz[1]}" r="5"/><circle class="point" cx="${P.metz[0]}" cy="${P.metz[1]}" r="3.2"/>
-    <circle class="halo" cx="${P.senon[0]}" cy="${P.senon[1]}" r="4"/><circle class="point" cx="${P.senon[0]}" cy="${P.senon[1]}" r="2.6"/>
-    <circle class="point" cx="${P.nancy[0]}" cy="${P.nancy[1]}" r="1.6" style="opacity:.6"/>
-    ${lbl(P.metz, 'Metz', 'ville', 8, 12)}${lbl(P.senon, 'Senon', 'ville', -8, -6, 'end')}${lbl(P.nancy, 'Nancy', '', 6, 3)}
-    ${lbl(P.luxembourg, 'Luxembourg', 'voisin', 0, -6, 'middle')}${lbl(P.allemagne, 'Allemagne', 'voisin', 4, 0)}${lbl(P.belgique, 'Belgique', 'voisin', -4, -4, 'end')}
-  </svg>`;
+    <circle class="point" cx="${P.nancy[0]}" cy="${P.nancy[1]}" r="2" style="opacity:.8"/><circle class="point" cx="${P.luxembourg[0]}" cy="${P.luxembourg[1]}" r="2" style="opacity:.8"/>
+    ${lbl(P.metz, 'Metz', 'ville', 8, 12)}${lbl(P.nancy, 'Nancy', 'ville-2', 6, 3)}
+    ${lbl(P.luxembourg, 'Luxembourg', 'voisin', 0, -6, 'middle')}${lbl(P.allemagne, 'Allemagne', 'voisin', 4, 0)}${lbl(P.belgique, 'Belgique', 'voisin', -8, 16, 'end')}
+  </svg><a class="carte-lien" href="https://www.google.com/maps/search/?api=1&amp;query=5+rue+Gambetta+57000+Metz" target="_blank" rel="noopener">Itinéraire vers la boutique</a>`;
+  new IntersectionObserver(([en]) => z.classList.toggle('a-l-ecran', en.isIntersecting)).observe(z);
   if (calme) return;
   const routes = $$('.route', z);
   routes.forEach((r) => { const l = r.getTotalLength(); gsap.set(r, { strokeDasharray: `${l}`, strokeDashoffset: l }); });
@@ -259,12 +327,12 @@ function construireContact() {
     if (!PB.selection.ids.length) { rappel.hidden = true; return; }
     rappel.hidden = false;
     rappel.innerHTML = `Votre sélection : ${PB.selection.ids.map((id) => `<strong>${PB.esc(o(id).titre)}</strong>`).join(', ')}.`;
-    if (!msg.value.trim()) msg.value = `Bonjour,\nje souhaite connaître les prix des pièces suivantes :\n${PB.selection.texte()}\n`;
+    if (!msg.value.trim()) msg.value = PB.typo(`Bonjour,\nje souhaite connaître les prix des pièces suivantes :\n${PB.selection.texte()}\n`);
     const r = $('input[value="Demande de prix"]'); if (r) r.checked = true;
   };
   if (ids.length && PB.memo.session('pb-demande-sel') === '1') { PB.memo.session('pb-demande-sel', '0'); remplir(); }
   document.addEventListener('click', (e) => { if (e.target.closest('[data-demander-sel]')) setTimeout(remplir, 50); });
-  sel.addEventListener('change', () => { const x = o(sel.value); if (x && !msg.value.trim()) msg.value = `Bonjour,\nje souhaite des renseignements sur : ${x.titre}.\n`; });
+  sel.addEventListener('change', () => { const x = o(sel.value); if (x && !msg.value.trim()) msg.value = PB.typo(`Bonjour,\nje souhaite des renseignements sur : ${x.titre}.\n`); });
   PB.monterFormulaire($('[data-formulaire]'), { message: (f) => `Votre demande a bien été notée${f.querySelector('#c-nom').value ? `, ${f.querySelector('#c-nom').value.trim()}` : ''}.` });
   if (!calme) {
     $$('.boutique figure img').forEach((img) => gsap.fromTo(img, { yPercent: -5, scale: 1.1 }, { yPercent: 5, scale: 1.1, ease: 'none', scrollTrigger: { trigger: img.closest('figure'), start: 'top bottom', end: 'bottom top', scrub: true } }));
@@ -291,5 +359,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(lancer); e
 const modeInitial = bureau();
 addEventListener('resize', () => {
   clearTimeout(window.__pbResize);
-  window.__pbResize = setTimeout(() => { if (bureau() !== modeInitial) location.reload(); }, 400);
+  // pas de rechargement si le visiteur a commence a remplir le formulaire
+  const rempli = () => [...document.querySelectorAll('input:not([type=radio]):not([type=checkbox]), textarea')].some((c) => c.value.trim() && c.value !== c.defaultValue);
+  window.__pbResize = setTimeout(() => { if (bureau() !== modeInitial && !rempli()) location.reload(); }, 400);
 });

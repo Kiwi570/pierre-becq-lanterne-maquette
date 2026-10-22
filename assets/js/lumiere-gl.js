@@ -11,7 +11,7 @@ precision highp float;
 varying vec2 vUv;
 uniform vec2 uRes; uniform vec2 uTexRes;
 vec2 couvre(vec2 uv, vec2 tr){ float ra=uRes.x/uRes.y, ta=tr.x/tr.y; vec2 s = ra>ta ? vec2(1., ta/ra) : vec2(ra/ta, 1.); return (uv-.5)*s+.5; }
-float hash(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
+float hash(vec2 p){ vec3 q = fract(vec3(p.xyx) * .1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
 `;
 
 const fragLanterne = COMMUN + /* glsl */ `
@@ -39,7 +39,9 @@ void main(){
   float fl = uFlamme * (.92 + .08*sin(uTemps*13.) * sin(uTemps*7.3));
   vec3 col = alb*(.16 + diff*att*2.6*chaud*fl) + spec*att*chaud*(.12 + dore*2.4)*fl;
   // poussiere doree dans le halo
-  float pou = step(.99975, hash(floor(frag/2.) + floor(uTemps*1.5))) * att * att * 2.2;
+  float g1 = hash(floor((frag + vec2(uTemps*7., -uTemps*13.)) / 3.));
+  float g2 = hash(floor((frag + vec2(-uTemps*4., -uTemps*7.)) / 2.) + 17.);
+  float pou = (step(.9993, g1) * (.55 + .45*sin(uTemps*2.3 + g1*80.)) * 2.4 + step(.9996, g2) * 1.5) * att * att;
   col += pou*vec3(1.,.85,.6);
   // eclats de vitrail : on garde les rayons, en miroir pour couvrir la largeur
   vec2 vu = couvre(vUv, uVitRes); vu.x = abs(fract((vu.x + uDecal)*.5)*2. - 1.);

@@ -9,23 +9,31 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const zone = $('[data-galerie]');
 
 const q = new URLSearchParams(location.search);
-const etat = { famille: q.get('f') || null, siecle: null, lorraine: q.get('lorraine') === '1', vue: 'vitrine' };
+const etat = { famille: q.get('f') || null, siecle: ['XVIIe', 'XVIIIe', 'XIXe', 'XXe'].includes(q.get('s')) ? q.get('s') : null, lorraine: q.get('lorraine') === '1', vue: 'vitrine' };
 const SIECLES = ['XVIIe', 'XVIIIe', 'XIXe', 'XXe'];
 const compte = (pred) => PB.objets.filter(pred).length;
 
-$('[data-filtres-familles]').innerHTML = `<button class="filtre" type="button" data-fam="" aria-pressed="${!etat.famille}">Toutes<small>${PB.objets.length}</small></button>` +
-  Object.entries(PB.familles).map(([k, n]) => `<button class="filtre" type="button" data-fam="${k}" aria-pressed="${etat.famille === k}">${n}<small>${compte((o) => o.famille === k)}</small></button>`).join('');
-$('[data-filtres-siecles]').innerHTML = SIECLES.map((s) => `<button class="filtre" type="button" data-siecle="${s}" aria-pressed="false">${s} siècle</button>`).join('');
+$('[data-filtres-familles]').innerHTML = `<button class="filtre" type="button" data-fam="" aria-pressed="${!etat.famille}">Toutes<small aria-hidden="true">${PB.objets.length}</small><span class="sr">, ${PB.objets.length} pièces</span></button>` +
+  Object.entries(PB.familles).map(([k, n]) => `<button class="filtre" type="button" data-fam="${k}" aria-pressed="${etat.famille === k}">${n}<small aria-hidden="true">${compte((o) => o.famille === k)}</small><span class="sr">, ${compte((o) => o.famille === k)} pièces</span></button>`).join('');
+$('[data-filtres-siecles]').innerHTML = SIECLES.map((s) => `<button class="filtre" type="button" data-siecle="${s}" aria-pressed="${etat.siecle === s}">${s} siècle</button>`).join('');
 $('[data-f-lorraine]').setAttribute('aria-pressed', String(etat.lorraine));
+// telephone : une seule rangee visible, les autres filtres derriere un bouton
+const rang2 = $('.filtres-2'); rang2.id = 'filtres-2';
+if (PB.etroit()) {
+  $('[data-filtres-familles]').insertAdjacentHTML('afterbegin', '<button class="filtre filtre-plus" type="button" data-plus aria-expanded="false" aria-controls="filtres-2">Filtres<small data-nb-plus aria-hidden="true"></small></button>');
+  $('[data-plus]').addEventListener('click', (e) => { const b = e.currentTarget; const on = b.getAttribute('aria-expanded') !== 'true'; b.setAttribute('aria-expanded', String(on)); $('.barre-filtres').classList.toggle('plus', on); ScrollTrigger.refresh(); });
+}
 
 const filtrer = () => PB.objets.filter((o) => (!etat.famille || o.famille === etat.famille) && (!etat.siecle || o.siecle === etat.siecle) && (!etat.lorraine || o.lorraine));
 
 function rendre(defiler = false) {
+  PB.liberer(zone);
   const liste = filtrer();
   $('[data-nb]').textContent = `${liste.length} ${liste.length > 1 ? 'pièces' : 'pièce'}`;
+  const nbp = $('[data-nb-plus]'); if (nbp) nbp.textContent = liste.length;
   $$('[data-vue]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vue === etat.vue)));
   if (!liste.length) {
-    zone.innerHTML = '<div class="vide-filtres"><p class="lead">Aucune pièce ne correspond à ces filtres pour le moment.</p><p class="petit">La galerie en ligne ne montre qu\'une partie du stock : écrivez-nous ce que vous cherchez.</p><button class="bouton" type="button" data-raz><span>Voir toute la galerie</span></button></div>';
+    zone.innerHTML = '<div class="vide-filtres"><p class="lead">Aucune pièce ne correspond à ces filtres pour le moment.</p><p class="petit">Écrivez-nous ce que vous cherchez : époque, style, dimensions.</p><button class="bouton" type="button" data-raz><span>Voir toute la galerie</span></button></div>';
     $('[data-raz]', zone).addEventListener('click', () => { etat.famille = null; etat.siecle = null; etat.lorraine = false; majFiltres(); rendre(); });
   } else if (etat.vue === 'siecles') {
     zone.innerHTML = SIECLES.map((s) => {
@@ -50,7 +58,7 @@ function majFiltres() {
   $$('[data-siecle]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.siecle === etat.siecle)));
   $('[data-f-lorraine]').setAttribute('aria-pressed', String(etat.lorraine));
   const u = new URL(location.href);
-  u.search = ''; if (etat.famille) u.searchParams.set('f', etat.famille); if (etat.lorraine) u.searchParams.set('lorraine', '1');
+  u.search = ''; if (etat.famille) u.searchParams.set('f', etat.famille); if (etat.siecle) u.searchParams.set('s', etat.siecle); if (etat.lorraine) u.searchParams.set('lorraine', '1');
   history.replaceState(null, '', u);
 }
 document.addEventListener('click', (e) => {

@@ -69,19 +69,8 @@ entree.addEventListener('change', () => {
 apercus.addEventListener('click', (ev) => { const b = ev.target.closest('[data-oter]'); if (!b) return; const [x] = fichiers.splice(Number(b.dataset.oter), 1); URL.revokeObjectURL(x.url); afficher(); });
 f.addEventListener('submit', (ev) => {
   ev.preventDefault();
-  const champs = [...f.querySelectorAll('[data-etape="4"] [required]')];
-  let premier = null;
-  champs.forEach((c) => {
-    const ko = !c.value.trim() || (c.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.value));
-    c.setAttribute('aria-invalid', String(ko));
-    if (ko) c.setAttribute('aria-describedby', err.id); else c.removeAttribute('aria-describedby');
-    if (ko && !premier) premier = c;
-  });
-  if (premier) { err.textContent = premier.type === 'email' && premier.value ? "L'adresse e-mail semble incomplète." : 'Merci d\'indiquer votre nom et votre e-mail.'; premier.focus(); return; }
-  const c = document.createElement('div');
-  c.className = 'confirmation'; c.setAttribute('role', 'status'); c.tabIndex = -1;
-  c.innerHTML = `<h3>Demande d'expertise notée</h3><p>Merci${$('#e-nom').value ? `, ${PB.esc($('#e-nom').value.trim())}` : ''}. Nous revenons vers vous pour fixer la suite : examen des photos, rendez-vous en boutique ou à domicile.</p><p class="mini">Maquette : rien n'a été envoyé, et vos ${fichiers.length} ${fichiers.length > 1 ? 'photos sont restées' : 'photo est restée'} sur votre appareil.</p>`;
-  f.replaceWith(c); c.focus(); PB.son.carillon();
+  if (PB.verifierChamps([...f.querySelectorAll('[data-etape="4"] [required]')], err, 'Merci d’indiquer votre nom et votre e-mail.')) return;
+  PB.confirmer(f, `<h3>Demande d’expertise notée</h3><p>Merci${$('#e-nom').value ? `, ${PB.esc($('#e-nom').value.trim())}` : ''}. Nous revenons vers vous pour fixer la suite : examen des photos, rendez-vous en boutique à Metz ou autre rendez-vous à convenir.</p><p class="mini">Maquette : rien n’a été envoyé, et vos ${fichiers.length} ${fichiers.length > 1 ? 'photos sont restées' : 'photo est restée'} sur votre appareil.</p>`);
 });
 aller(0, false);
 PB.dorer(); PB.aimants();

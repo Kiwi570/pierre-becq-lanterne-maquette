@@ -15,8 +15,18 @@ Les 15 pièces sont dans `data/objets.js` (textes repris du site actuel, fautes 
 ## Simulé dans la maquette
 Sélection, demandes de prix, formulaire de contact et demande d'expertise (les photos restent sur l'appareil) : rien n'est envoyé.
 
-## À compléter
-E-mail, horaires des boutiques, mentions légales (SIRET, hébergeur, CGV, données personnelles), dimensions des 3 fauteuils, délais et honoraires d'expertise, photo de la boutique de Senon, conditions de vente de l'objet en ivoire.
+## À compléter ou à confirmer par la maison
+- E-mail (l'annuaire de la CNE indique une adresse à confirmer), horaires de la boutique de Metz.
+- Senon (Meuse) : absente du site actuel, l'adresse vient des annuaires, qui se contredisent (adresse, téléphone, horaires). Lieu d'accueil à confirmer ou à retirer.
+- Cour d'appel de rattachement pour le titre d'expert judiciaire honoraire.
+- Mentions légales : raison sociale, SIRET, hébergeur, conditions de vente, données personnelles, titulaire des droits sur les photos.
+- Chope en ivoire : espèce et certificat CITES (vente dans l'Union européenne soumise à certificat).
+- Dimensions des 3 fauteuils, délais et honoraires d'expertise, photo de la boutique de Senon.
+- Photos en haute définition des pièces : plusieurs photos du site actuel font 1024 px de large, la pièce détourée n'y mesure que 300 à 500 px.
+- Dates à préciser : coffret attribué à César Bagard (mort en 1709) daté « XVIIIe siècle » ; devise du coffret circulaire (« ou » ou « où »).
+
+## Effets
+Transition de page par la bougie ; vers une fiche, la pièce glisse de sa carte jusqu'à la fiche (transitions de vue du navigateur, Chrome, Edge et Safari récents). Sur téléphone : frise verticale avec balancier, salle des coups de cœur avec compteur, barre d'action sur les fiches.
 
 ## Bibliothèques
 GSAP 3 (ScrollTrigger, CustomEase), Lenis, OGL. Polices Bodoni Moda et Jost (licence OFL), hébergées dans `assets/fonts`.

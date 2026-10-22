@@ -55,12 +55,32 @@ PB.dims = (o) => {
   if (!d) return '';
   const n = (v) => String(v).replace('.', ',');
   const p = [];
-  if (d.h) p.push(`H ${n(d.h)}`);
-  if (d.l) p.push(`L ${n(d.l)}`);
-  if (d.p) p.push(`P ${n(d.p)}`);
-  if (d.d) p.push(`Ø ${n(d.d)}`);
-  return p.length ? `${p.join(' × ')} cm` : '';
+  if (d.h) p.push(`H\u00a0${n(d.h)}`);
+  if (d.l) p.push(`L\u00a0${n(d.l)}`);
+  if (d.p) p.push(`P\u00a0${n(d.p)}`);
+  if (d.d) p.push(`Ø\u00a0${n(d.d)}`);
+  return p.length ? `${p.join(' ×\u00a0')}\u00a0cm` : '';
 };
+/* piece en vente libre, ou soumise a un certificat (ivoire) */
+PB.enVente = (o) => o.vente !== 'certificat';
+PB.ancienne = (o) => (o.annee || 0) < 1950;
+PB.mentionPrix = (o) => (PB.enVente(o) ? 'Prix sur demande' : 'Certificat CITES à compléter');
+/* typographie francaise des textes ajoutes par le code : espaces insecables, apostrophes */
+const LETTRES = 'A-Za-zÀ-ÖØ-öø-ÿŒœ';
+const reApo = new RegExp(`([${LETTRES}])'(?=[${LETTRES}])`, 'g');
+PB.typo = (t) => t.replace(reApo, '$1’').replace(/[ \u00a0\u202f]+([;!?])/g, '\u202f$1').replace(/[ \u00a0\u202f]+:(?=\s|$)/g, '\u00a0:')
+  .replace(/«[ \u00a0\u202f]*/g, '«\u00a0').replace(/[ \u00a0\u202f]*»/g, '\u00a0»');
+const horsTypo = 'script, style, textarea, svg, input, select';
+const typoTexte = (n) => { if (n.parentElement?.closest(horsTypo)) return; const v = PB.typo(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; };
+const typoArbre = (racine) => {
+  const w = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT);
+  let n; while ((n = w.nextNode())) typoTexte(n);
+};
+function monterTypo() {
+  typoArbre(document.body);
+  new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType === 1) typoArbre(n); else if (n.nodeType === 3) typoTexte(n); })))
+    .observe(document.body, { childList: true, subtree: true });
+}
 PB.alt = (o) => `${o.titre}${o.materiaux ? `, ${o.materiaux.toLowerCase()}` : ''}`;
 PB.annees = () => new Date().getFullYear() - 1969;
 
@@ -125,11 +145,21 @@ function monterChrome() {
     <button class="outil fermer" type="button" data-menu-fermer aria-label="Fermer le menu">${ICO.croix}</button>
     <a href="galerie.html">La galerie</a><a href="expertise.html">L'expertise</a><a href="index.html#maison">La maison</a>
     <span class="sep" aria-hidden="true"></span>
-    <a class="second" href="index.html#lorraine">Trésors de Lorraine</a><a class="second" href="index.html#successions">Successions</a><a class="second" href="index.html#boutiques">Boutiques</a><a class="second" href="index.html#contact">Contact</a>`;
+    <a class="second" href="index.html#lorraine">Trésors de Lorraine</a><a class="second" href="index.html#successions">Successions</a><a class="second" href="index.html#boutiques">Boutiques</a><a class="second" href="index.html#contact">Contact</a>
+    <div class="menu-pied">
+      <a class="bouton bouton--or" href="expertise.html#formulaire"><span>Demander une expertise</span></a>
+      <button class="menu-option" type="button" data-menu-selection>${ICO.etiquette}<span>Ma sélection</span><span class="chiffres" data-compte-sel-menu>0</span></button>
+      <div class="menu-reglages">
+        <button class="menu-option" type="button" data-menu-son aria-pressed="false">${ICO.balancier}<span>Son de pendule</span></button>
+        <button class="menu-option" type="button" data-menu-calme aria-pressed="${calme}">${ICO.calme}<span>Mode calme</span></button>
+      </div>
+      <p>5 rue Gambetta, 57000 Metz</p>
+      <div class="menu-contact"><a class="bouton" href="tel:+33387636161"><span>Appeler</span></a><a class="bouton" href="https://www.google.com/maps/search/?api=1&amp;query=5+rue+Gambetta+57000+Metz" target="_blank" rel="noopener"><span>Itinéraire</span></a></div>
+    </div>`;
   document.body.append(menu);
 
   const voile = document.createElement('div'); voile.className = 'voile'; voile.dataset.voile = '';
-  const tiroir = document.createElement('aside');
+  const tiroir = document.createElement('div');
   tiroir.className = 'tiroir'; tiroir.setAttribute('role', 'dialog'); tiroir.setAttribute('aria-modal', 'true'); tiroir.setAttribute('aria-label', 'Ma sélection'); tiroir.setAttribute('aria-hidden', 'true'); tiroir.inert = true;
   tiroir.innerHTML = `
     <header><h2>Ma sélection</h2><button class="outil" type="button" data-selection-fermer aria-label="Fermer ma sélection">${ICO.croix}</button></header>
@@ -161,9 +191,16 @@ function monterChrome() {
     btnMenu.setAttribute('aria-expanded', String(on));
     PB.isoler(menu, on);
     menu.inert = !on;
-    if (on) { PB.lenis?.stop(); menu.querySelector('a').focus(); } else { PB.lenis?.start(); btnMenu.focus(); }
+    if (on) {
+      PB.lenis?.stop(); menu.querySelector('a').focus();
+      if (!calme) gsap.fromTo(menu.querySelectorAll(':scope > a, .sep, .menu-pied'), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.05, overwrite: true });
+    } else { PB.lenis?.start(); btnMenu.focus(); }
   };
   btnMenu.addEventListener('click', () => ouvrirMenu(true));
+  // reglages du menu : memes actions que les boutons de l'en-tete
+  menu.querySelector('[data-menu-son]').addEventListener('click', (e) => { entete.querySelector('[data-son]').click(); e.currentTarget.setAttribute('aria-pressed', String(Pendule.actif)); });
+  menu.querySelector('[data-menu-calme]').addEventListener('click', () => entete.querySelector('[data-calme]').click());
+  menu.querySelector('[data-menu-selection]').addEventListener('click', () => { ouvrirMenu(false); setTimeout(() => Selection.ouvrir(), 120); });
   menu.querySelector('[data-menu-fermer]').addEventListener('click', () => ouvrirMenu(false));
   menu.querySelectorAll('a').forEach((l) => l.addEventListener('click', () => ouvrirMenu(false)));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.classList.contains('ouvert')) ouvrirMenu(false); });
@@ -244,7 +281,7 @@ function monterDefilement() {
 /* ---------- curseur flamme ---------- */
 function monterCurseur() {
   addEventListener('pointermove', (e) => { PB.souris = { x: e.clientX, y: e.clientY }; }, { passive: true });
-  if (!pointeurFin) return;
+  if (!pointeurFin || calme) return;
   document.documentElement.classList.add('curseur-actif');
   const f = document.querySelector('.flamme');
   const anneau = document.querySelector('.curseur-anneau');
@@ -284,6 +321,8 @@ PB.aimants = (racine = document) => {
   });
 };
 
+/* avant de remplacer des cartes : on arrete leurs animations d'inclinaison */
+PB.liberer = (racine) => racine.querySelectorAll('[data-tilt]').forEach((el) => { el._tilt?.forEach((q) => q.tween?.kill()); el._tilt = null; gsap.killTweensOf(el); });
 PB.inclinaison = (racine = document) => {
   if (!pointeurFin || calme) return;
   racine.querySelectorAll('[data-tilt]').forEach((el) => {
@@ -291,6 +330,7 @@ PB.inclinaison = (racine = document) => {
     el.dataset.tiltOk = '1';
     const rx = gsap.quickTo(el, 'rotationX', { duration: 0.7, ease: 'power3' });
     const ry = gsap.quickTo(el, 'rotationY', { duration: 0.7, ease: 'power3' });
+    el._tilt = [rx, ry];
     gsap.set(el, { transformPerspective: 1000 });
     const vis = el.querySelector('.carte-visuel');
     el.addEventListener('pointermove', (e) => {
@@ -328,11 +368,14 @@ PB.dorer = (racine = document, { debut = 'top 86%', delai = 0 } = {}) => {
     mots.forEach((m) => m.classList.add('dore'));
     if (calme) { gsap.set(mots, { backgroundPosition: '60px 0px, 0% 0%' }); return; }
     const tl = gsap.timeline({ paused: true, delay: delai });
-    tl.fromTo(mots, { clipPath: 'inset(-40% 100% -60% -10%)', y: 14, skewX: -6 }, { clipPath: 'inset(-40% -10% -60% -10%)', y: 0, skewX: 0, duration: 1.15, ease: 'feuille', stagger: 0.09, onComplete: () => gsap.set(mots, { clearProps: 'clipPath' }) })
+    // le titre entier attend la dorure : pas de mots ordinaires seuls a l'ecran
+    const titre = el.closest('h1, h2, h3');
+    if (titre && titre !== el) { gsap.set(titre, { opacity: 0 }); tl.to(titre, { opacity: 1, duration: 0.6, ease: 'power1.out' }, 0); }
+    tl.fromTo(mots, { clipPath: 'inset(-40% 100% -60% -10%)', y: 14, skewX: -6 }, { clipPath: 'inset(-40% -10% -60% -10%)', y: 0, skewX: 0, duration: 1.15, ease: 'feuille', stagger: 0.09, onComplete: () => gsap.set(mots, { clearProps: 'clipPath' }) }, 0)
       .fromTo(mots, { backgroundPosition: '0px 0px, 100% 0%' }, { backgroundPosition: '60px 0px, 0% 0%', duration: 2.4, ease: 'power2.out', stagger: 0.09 }, 0);
     el._dorure = tl;
     if (el.closest('.entree')) { PB.pret.then(() => tl.play()); return; }
-    ScrollTrigger.create({ trigger: el, start: debut, once: true, onEnter: () => tl.play() });
+    ScrollTrigger.create({ trigger: el, start: PB.etroit() && debut === 'top 86%' ? 'top 96%' : debut, once: true, onEnter: () => tl.play() });
   });
 };
 
@@ -364,6 +407,7 @@ const Pendule = {
   },
   battre() {
     if (!this.actif) return;
+    if (document.hidden) { this.minuteur = setTimeout(() => this.battre(), 1000); return; }
     this.pair = !this.pair;
     this.tic(0.16, this.pair);
     this.minuteur = setTimeout(() => this.battre(), 1000);
@@ -418,11 +462,11 @@ const Selection = {
   sauver() { memo.ecrire('pb-selection', this.ids); this.rendre(); document.querySelectorAll('[data-selection]').forEach((b) => this.etat(b)); },
   basculer(id, depuis) {
     const o = PB.parId[id]; if (!o) return;
-    if (this.a(id)) { this.ids = this.ids.filter((x) => x !== id); this.sauver(); PB.toast(`${o.titre} retiré de votre sélection.`); return; }
+    if (this.a(id)) { this.ids = this.ids.filter((x) => x !== id); this.sauver(); PB.toast(`Retiré de votre sélection : ${o.titre}.`); return; }
     document.querySelector('.entete')?.classList.remove('est-cache');
     this.ids.push(id); this.sauver(); this.vol(depuis);
     Pendule.carillon();
-    PB.toast(`${o.titre} ajouté à votre sélection.`);
+    PB.toast(`Dans votre sélection : ${o.titre}.`);
   },
   etat(b) {
     const dedans = this.a(b.dataset.selection);
@@ -432,7 +476,7 @@ const Selection = {
     if (b.classList.contains('ajout')) {
       b.innerHTML = `${dedans ? ICO.ok : ICO.plus}<span>${dedans ? 'Dans ma sélection' : 'Sélection'}</span>`;
       b.setAttribute('aria-label', dedans ? `${o?.titre} est dans votre sélection, la retirer` : `Ajouter ${o?.titre} à ma sélection`);
-    } else if (b.querySelector('span')) b.querySelector('span').textContent = dedans ? 'Dans ma sélection' : 'Ajouter à ma sélection';
+    } else if (b.querySelector('span')) { b.querySelector('span').textContent = dedans ? 'Dans ma sélection' : 'Ajouter à ma sélection'; b.setAttribute('aria-label', dedans ? `${o?.titre} est dans votre sélection, la retirer` : `Ajouter ${o?.titre} à ma sélection`); }
   },
   vol(depuis) {
     if (calme || !depuis) return;
@@ -447,7 +491,8 @@ const Selection = {
       .to(v, { duration: 0.9, ease: 'power2.in', x: c.left + c.width / 2 - (r.left + r.width / 2), scale: 0.3, rotation: 12 }, 0)
       .to(v, { duration: 0.9, ease: 'back.in(1.4)', y: c.top + c.height / 2 - (r.top + r.height / 2) }, 0)
       .to(v, { opacity: 0, duration: 0.2 }, 0.75)
-      .fromTo(cible, { scale: 1 }, { scale: 1.2, duration: 0.18, yoyo: true, repeat: 1 }, 0.82);
+      .fromTo(cible, { scale: 1 }, { scale: 1.2, duration: 0.18, yoyo: true, repeat: 1 }, 0.82)
+      .fromTo(cible.querySelector('svg') || cible, { rotation: -24 }, { rotation: 0, duration: 1.4, ease: 'elastic.out(1.2, 0.28)', transformOrigin: '72% 28%' }, 0.86);
   },
   ouvrir() {
     const p = document.querySelector('.tiroir');
@@ -468,6 +513,7 @@ const Selection = {
   rendre() {
     const n = this.ids.length;
     const p = document.querySelector('[data-compte-sel]'); if (p) { p.textContent = n; p.classList.toggle('on', n > 0); }
+    const pm = document.querySelector('[data-compte-sel-menu]'); if (pm) pm.textContent = n;
     const liste = document.querySelector('[data-selection-liste]'); const pied = document.querySelector('[data-selection-pied]');
     if (!liste) return;
     if (!n) {
@@ -505,34 +551,51 @@ function monterSelection() {
 PB.majSelection = (racine = document) => racine.querySelectorAll('[data-selection]').forEach((b) => Selection.etat(b));
 
 /* ---------- formulaires simules ---------- */
+/* champs obligatoires : un message sous chaque champ, le premier champ fautif amene au centre de l'ecran */
+const MESSAGES = { nom: 'Indiquez votre nom.', email: 'Indiquez votre adresse e-mail.', message: 'Écrivez quelques mots.' };
+PB.verifierChamps = (champs, err, resume) => {
+  let premier = null;
+  champs.forEach((c) => {
+    const vide = !c.value.trim();
+    const mauvais = c.type === 'email' && c.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.value);
+    const ko = vide || mauvais;
+    const id = `${c.id}-err`;
+    let m = document.getElementById(id);
+    if (ko) {
+      if (!m) { m = document.createElement('p'); m.className = 'erreur-champ'; m.id = id; c.closest('.champ')?.append(m); }
+      m.textContent = mauvais ? 'Cette adresse e-mail semble incomplète.' : (MESSAGES[c.name] || 'Ce champ est à remplir.');
+      c.setAttribute('aria-invalid', 'true'); c.setAttribute('aria-describedby', `${id} ${err.id}`);
+      c.addEventListener('input', () => { if (c.value.trim()) { c.setAttribute('aria-invalid', 'false'); m?.remove(); c.removeAttribute('aria-describedby'); } }, { once: true });
+      if (!premier) premier = c;
+    } else { c.setAttribute('aria-invalid', 'false'); m?.remove(); c.removeAttribute('aria-describedby'); }
+  });
+  if (premier) {
+    err.textContent = resume;
+    premier.focus({ preventScroll: true });
+    if (PB.lenis) PB.lenis.scrollTo(premier, { offset: -innerHeight * 0.4, duration: 0.8 }); else premier.scrollIntoView({ block: 'center', behavior: calme ? 'auto' : 'smooth' });
+  } else err.textContent = '';
+  return premier;
+};
+/* confirmation : un cachet de cire se pose sur la carte, puis le carillon sonne */
+PB.confirmer = (f, html) => {
+  const c = document.createElement('div');
+  c.className = 'confirmation'; c.setAttribute('role', 'status'); c.tabIndex = -1;
+  c.innerHTML = `<span class="sceau" aria-hidden="true"><svg class="empreinte" viewBox="0 0 40 40"><path d="M9 21l7 7 15-16"/></svg></span>${html}`;
+  f.replaceWith(c);
+  c.focus({ preventScroll: true });
+  if (PB.lenis) PB.lenis.scrollTo(c, { offset: -(innerHeight * 0.25), duration: 0.8 }); else c.scrollIntoView({ block: 'center' });
+  if (!calme) gsap.from(c.querySelector('.sceau'), { scale: 2.2, rotation: -24, opacity: 0, duration: 0.6, ease: 'back.out(2.4)', delay: 0.25 });
+  Pendule.carillon();
+  return c;
+};
 PB.monterFormulaire = (f, { message = () => 'Message bien reçu.' } = {}) => {
   if (!f) return;
   const err = f.querySelector('[data-erreur]');
   err.id = err.id || `err-${Math.random().toString(36).slice(2, 7)}`;
   f.addEventListener('submit', (e) => {
     e.preventDefault();
-    const champs = [...f.querySelectorAll('[required]')];
-    let premier = null;
-    champs.forEach((c) => {
-      const vide = !c.value.trim();
-      const mauvais = c.type === 'email' && c.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.value);
-      const ko = vide || mauvais;
-      c.setAttribute('aria-invalid', String(ko));
-      if (ko) c.setAttribute('aria-describedby', err.id); else c.removeAttribute('aria-describedby');
-      if (ko && !premier) premier = c;
-    });
-    if (premier) {
-      err.textContent = premier.type === 'email' && premier.value ? "L'adresse e-mail semble incomplète." : 'Merci de remplir les champs indiqués.';
-      premier.focus();
-      return;
-    }
-    err.textContent = '';
-    const c = document.createElement('div');
-    c.className = 'confirmation'; c.setAttribute('role', 'status'); c.tabIndex = -1;
-    c.innerHTML = `<h3>Merci pour votre envoi</h3><p>${PB.esc(message(f))}</p><p class="mini">Maquette : rien n'a été envoyé. Sur le site final, la boutique vous répondra dans les meilleurs délais.</p>`;
-    f.replaceWith(c);
-    c.focus();
-    Pendule.carillon();
+    if (PB.verifierChamps([...f.querySelectorAll('[required]')], err, 'Merci de compléter les champs indiqués.')) return;
+    PB.confirmer(f, `<h3>Merci pour votre envoi</h3><p>${PB.esc(message(f))}</p><p class="mini">Maquette : rien n'a été envoyé. Sur le site final, la boutique vous répondra dans les meilleurs délais.</p>`);
   });
 };
 
@@ -547,6 +610,11 @@ function monterTransitions() {
     etat.r = 0; appliquer(); iris.style.setProperty('--x', '50%'); iris.style.setProperty('--y', '50%');
     gsap.to(etat, { r: 150, duration: 1.1, ease: 'power2.inOut', delay: 0.08, onUpdate: appliquer, onComplete: () => { iris.style.visibility = 'hidden'; } });
   } else { etat.r = 150; appliquer(); iris.style.visibility = 'hidden'; }
+  // vers une fiche, depuis une carte : la piece glisse jusqu'a la fiche (transition de vue du navigateur)
+  const vtPossible = 'CSSViewTransitionRule' in window;
+  let nommee = null;
+  const nommer = (el) => { if (nommee) nommee.style.viewTransitionName = ''; nommee = el; if (el) el.style.viewTransitionName = 'piece-vue'; };
+  addEventListener('pageshow', (e) => { if (e.persisted) setTimeout(() => nommer(null), 900); });
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
     if (!a || calme || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank') return;
@@ -554,6 +622,10 @@ function monterTransitions() {
     if (url.origin !== location.origin || !/\.html$|\/$/.test(url.pathname)) return;
     if (url.pathname === location.pathname && url.search === location.search) return;
     if (a.getAttribute('href').startsWith('#')) return;
+    const carte = a.closest('[data-carte]');
+    const image = carte && /objet\.html$/.test(url.pathname) ? carte.querySelector('img.vp') : null;
+    if (vtPossible && image) { nommer(image); memo.session('pb-vt', '1'); return; }
+    document.querySelectorAll('img.vp').forEach((i) => { if (i.style.viewTransitionName) i.style.viewTransitionName = 'none'; });
     e.preventDefault();
     memo.session('pb-transition', '1');
     iris.style.setProperty('--x', `${e.clientX || innerWidth / 2}px`); iris.style.setProperty('--y', `${e.clientY || innerHeight / 2}px`);
@@ -570,12 +642,14 @@ function monterTransitions() {
 function ouverture() {
   return new Promise((resoudre) => {
     const premiere = memo.session('pb-vu') !== '1';
-    if (!premiere || calme || document.body.dataset.ouverture === 'non') { resoudre(); return; }
+    const finIntro = () => document.documentElement.classList.remove('intro');
+    if (!premiere || calme || document.body.dataset.ouverture === 'non') { finIntro(); resoudre(); return; }
     memo.session('pb-vu', '1');
     const o = document.createElement('div');
     o.className = 'ouverture'; o.setAttribute('aria-hidden', 'true');
     o.innerHTML = '<div class="scene"><div class="meche"><i></i></div><div class="mot">Pierre Becq</div><div class="depuis">Antiquaire à Metz depuis 1969</div></div><canvas class="etincelles"></canvas>';
     document.body.append(o);
+    finIntro();
     const cv = o.querySelector('canvas'); const ctx = cv.getContext('2d');
     const dpr = Math.min(2, devicePixelRatio || 1);
     cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; cv.style.width = '100%'; cv.style.height = '100%';
@@ -606,6 +680,10 @@ function ouverture() {
       .add(() => resoudre(), 1.7)
       .to(etat, { r: Math.hypot(innerWidth, innerHeight), duration: 1.1, ease: 'power2.in', onUpdate: () => o.style.setProperty('--r', `${etat.r}px`) }, 1.6)
       .to(meche, { scale: 3, opacity: 0, duration: 0.6, ease: 'power2.in' }, 1.6);
+    // un toucher, un clic ou une touche passe l'ouverture
+    const passer = () => { if (tl.progress() < 1) tl.progress(1, false); };
+    o.addEventListener('pointerdown', passer, { once: true });
+    addEventListener('keydown', passer, { once: true });
   });
 }
 
@@ -618,9 +696,9 @@ function monterPied() {
   const chemins = zone.querySelectorAll('path');
   if (calme) { chemins.forEach((p) => { p.style.fill = 'rgba(201,163,91,.18)'; }); return; }
   chemins.forEach((p) => { const l = p.getTotalLength(); p.style.strokeDasharray = l; p.style.strokeDashoffset = l; });
-  gsap.timeline({ scrollTrigger: { trigger: zone, start: 'top 88%', once: true } })
-    .to(chemins, { strokeDashoffset: 0, duration: 2.6, ease: 'power2.inOut', stagger: 0.1 })
-    .to(chemins, { fill: 'rgba(201,163,91,.18)', duration: 1.4 }, 2);
+  gsap.timeline({ scrollTrigger: { trigger: zone, start: 'top 98%', once: true } })
+    .to(chemins, { strokeDashoffset: 0, duration: 1.8, ease: 'power2.inOut', stagger: 0.06 })
+    .to(chemins, { fill: 'rgba(201,163,91,.18)', duration: 1.2 }, 1.2);
 }
 
 /* ---------- apparitions discretes ---------- */
@@ -648,8 +726,21 @@ function memoirePosition() {
 /* ---------- demarrage ---------- */
 let resoudrePret;
 PB.pret = new Promise((r) => { resoudrePret = r; });
+/* clavier : un element qui recoit le focus n'attend pas la fin d'une apparition animee */
+function monterFocusVisible() {
+  if (calme) return;
+  document.addEventListener('focusin', (e) => {
+    let el = e.target;
+    while (el && el !== document.body) {
+      gsap.getTweensOf(el).forEach((t) => { if (t.repeat() !== -1 && !t.scrollTrigger?.vars?.scrub && !(t.vars && t.vars.scrollTrigger && t.vars.scrollTrigger.scrub)) t.progress(1); });
+      el = el.parentElement;
+    }
+  });
+}
 export function demarrer() {
   monterChrome();
+  monterFocusVisible();
+  monterTypo();
   monterDefilement();
   monterCurseur();
   monterSon();
