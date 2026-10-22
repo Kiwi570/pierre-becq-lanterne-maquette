@@ -61,22 +61,28 @@
   <!-- 2. La maison : depuis 1969, les garanties en cachets de cire -->
   <section class="section maison" id="maison" aria-labelledby="titre-maison">
     <div class="contenu maison-grille">
-      <div class="maison-annees" aria-hidden="true">
-        <span class="mini">Depuis</span>
-        <span class="annee display" data-annee>1969</span>
-        <span class="mini" data-annees-depuis></span>
-      </div>
+      <figure class="maison-photo" data-parallaxe-photo>
+        <div class="maison-cadre">
+        <span class="filet-or" aria-hidden="true"></span>
+        <span class="cadre-photo"><img src="assets/img/site/boutique-interieur-900.webp" srcset="assets/img/site/boutique-interieur-400.webp 400w, assets/img/site/boutique-interieur-900.webp 900w, assets/img/site/boutique-interieur-1600.webp 1600w" sizes="(max-width: 860px) 92vw, 44vw" alt="Dans la boutique de Metz, un objet d’art examiné de près" loading="lazy" width="4000" height="2323"></span>
+        <div class="medaillon" data-medaillon aria-hidden="true">
+          <svg class="medaillon-anneau" viewBox="0 0 200 200"><defs><path id="cercle-medaillon" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"/></defs><circle cx="100" cy="100" r="97"/><circle cx="100" cy="100" r="64"/><text><textPath href="#cercle-medaillon" textLength="498" lengthAdjust="spacing">Antiquaire à Metz · Mobilier et objets d’art · </textPath></text></svg>
+          <span class="medaillon-coeur"><small>Depuis</small><strong class="chiffres" data-annee>1969</strong></span>
+        </div>
+        </div>
+        <figcaption class="mini">La boutique, 5 rue Gambetta à Metz.</figcaption>
+      </figure>
       <div class="maison-texte">
         <p class="sur-titre">La maison</p>
         <h2 class="titre-section" id="titre-maison"><span class="dore" data-dorure>Plus de cinquante ans</span> au service des belles pièces</h2>
-        <p class="lead">Avec plus de 50 ans d’expérience, l’entreprise Antiquités Becq vous propose du mobilier du XVIe au XXe siècle et des objets d’art.</p>
+        <p class="lead">Avec plus de 50 ans d’expérience, l’entreprise Antiquités Becq vous propose du mobilier du XVIe au XXe siècle et des objets d’art.</p>
         <p>Nos spécialistes d’antiquités et d’objets d’art expertisent et effectuent toutes les recherches nécessaires. Ils pourront alors vous apporter les informations attendues sur votre objet : le prix, l’époque.</p>
-        <p class="mini">Metz, Nancy, Luxembourg.</p>
+        <ul class="reperes" data-reperes>
+          <li><strong class="chiffres" data-annees-depuis>57</strong><span>ans d’antiquités, depuis 1969</span></li>
+          <li><strong>XVIe – XXe</strong><span>siècles de mobilier et d’objets d’art</span></li>
+          <li><strong>Metz</strong><span>Nancy · Luxembourg</span></li>
+        </ul>
       </div>
-      <figure class="maison-photo" data-parallaxe-photo>
-        <span class="cadre-photo"><img src="assets/img/site/boutique-interieur-900.webp" srcset="assets/img/site/boutique-interieur-400.webp 400w, assets/img/site/boutique-interieur-900.webp 900w, assets/img/site/boutique-interieur-1600.webp 1600w" sizes="(max-width: 860px) 92vw, 40vw" alt="Dans la boutique de Metz, un objet d’art examiné de près" loading="lazy" width="4000" height="2323"></span>
-        <figcaption class="mini">La boutique, 5 rue Gambetta à Metz.</figcaption>
-      </figure>
     </div>
     <div class="contenu">
       <ul class="cachets" data-cachets aria-label="Nos garanties">

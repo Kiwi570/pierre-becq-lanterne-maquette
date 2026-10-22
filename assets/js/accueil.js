@@ -40,31 +40,41 @@ if (!calme) {
 
 /* ---------------- 2. la maison ---------------- */
 const annees = PB.annees();
-$('[data-annees-depuis]').textContent = `${annees} ans d'antiquités`;
+$('[data-annees-depuis]').textContent = annees;
 if (!calme) {
   const ann = $('[data-annee]'); const c = { v: new Date().getFullYear() };
   let dernier = 0;
   // largeur fixe : la plus large des annees affichees, pour que rien ne bouge pendant le defilement des chiffres
   const fixerLargeur = () => {
     ann.style.minWidth = ''; let max = 0;
-    for (let a = 1969; a <= c.v; a++) { ann.textContent = a; max = Math.max(max, ann.getBoundingClientRect().width); }
-    ann.style.minWidth = `${Math.ceil(max)}px`; ann.textContent = dernier || c.v;
+    for (let a = 1969; a <= new Date().getFullYear(); a++) { ann.textContent = a; max = Math.max(max, ann.getBoundingClientRect().width); }
+    ann.style.minWidth = `${Math.ceil(max)}px`; ann.textContent = dernier || new Date().getFullYear();
   };
   fixerLargeur();
-  ann.textContent = c.v;
   if (document.fonts) document.fonts.ready.then(fixerLargeur);
   addEventListener('resize', () => { clearTimeout(ann._t); ann._t = setTimeout(fixerLargeur, 300); });
   const compter = (duree = 2.4) => { c.v = new Date().getFullYear(); gsap.to(c, { v: 1969, duration: duree, ease: 'power3.out', overwrite: true, onUpdate: () => { const v = Math.round(c.v); if (v !== dernier) { dernier = v; ann.textContent = v; if (PB.son.actif && v % 5 === 0) PB.son.tic(0.18, v % 10 === 0); } } }); };
-  ScrollTrigger.create({ trigger: '.maison', start: 'top 70%', once: true, onEnter: () => compter() });
-  const zoneAnnee = $('.maison-annees');
-  zoneAnnee.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') compter(1.6); });
-  zoneAnnee.addEventListener('click', () => compter(1.6));
+  // le medaillon : son anneau tourne lentement (plus vite au survol), l'annee remonte le temps jusqu'a 1969
+  const med = $('[data-medaillon]'); const anneau = $('.medaillon-anneau', med);
+  const tour = gsap.to(anneau, { rotation: 360, duration: 48, ease: 'none', repeat: -1, transformOrigin: '50% 50%', paused: true });
+  ScrollTrigger.create({ trigger: med, start: 'top bottom', end: 'bottom top', onToggle: (st) => (st.isActive ? tour.play() : tour.pause()) });
+  med.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { gsap.to(tour, { timeScale: 7, duration: 0.6 }); compter(1.4); } });
+  med.addEventListener('pointerleave', () => gsap.to(tour, { timeScale: 1, duration: 1.4 }));
+  med.addEventListener('click', () => { compter(1.4); gsap.fromTo(tour, { timeScale: 9 }, { timeScale: 1, duration: 2 }); });
+  const nb = $('[data-annees-depuis]'); const cn = { v: 0 }; nb.textContent = 0;
+  const tlM = gsap.timeline({ scrollTrigger: { trigger: '.maison-grille', start: 'top 78%', once: true } });
+  tlM.from('.maison-photo .cadre-photo', { clipPath: 'inset(100% 0 0 0)', duration: 1.4, ease: 'power3.inOut', clearProps: 'clipPath' }, 0)
+    .from('.maison-photo .filet-or', { x: -22, y: 22, opacity: 0, duration: 1.2, ease: 'power3.out' }, 0.5)
+    .from(med, { scale: 0.4, rotation: -60, opacity: 0, duration: 1, ease: 'back.out(1.8)', onStart: () => compter() }, 0.8)
+    .from('.maison-photo figcaption', { opacity: 0, y: 10, duration: 0.7, ease: 'power2.out' }, 0.8);
+  gsap.timeline({ scrollTrigger: { trigger: '[data-reperes]', start: 'top 94%', once: true } })
+    .fromTo('.reperes', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 -10% 0 0)', duration: 1.2, ease: 'power3.inOut', clearProps: 'clipPath' }, 0)
+    .from($$('.reperes li'), { y: 18, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.12 }, 0.25)
+    .to(cn, { v: annees, duration: 1.6, ease: 'power2.out', onUpdate: () => { nb.textContent = Math.round(cn.v); } }, 0.3);
   gsap.from($$('[data-cachets] .cachet'), { opacity: 0, duration: 0.01, stagger: 0.16, scrollTrigger: { trigger: '[data-cachets]', start: 'top 92%', once: true } });
   gsap.from($$('[data-cachets] .cire'), { scale: 1.9, opacity: 0, rotation: () => gsap.utils.random(-30, 30), duration: 0.55, ease: 'back.out(2.2)', stagger: 0.16, clearProps: 'transform,opacity', scrollTrigger: { trigger: '[data-cachets]', start: 'top 92%', once: true } });
   gsap.from($$('[data-cachets] .cachet strong, [data-cachets] .cachet > span:not(.cire)'), { opacity: 0, y: 10, duration: 0.6, stagger: 0.08, delay: 0.3, scrollTrigger: { trigger: '[data-cachets]', start: 'top 92%', once: true } });
   gsap.fromTo('[data-parallaxe-photo] img', { yPercent: -6, scale: 1.12 }, { yPercent: 6, scale: 1.12, ease: 'none', scrollTrigger: { trigger: '.maison-photo', start: 'top bottom', end: 'bottom top', scrub: true } });
-  gsap.from('.maison-photo .cadre-photo', { clipPath: 'inset(100% 0 0 0)', duration: 1.4, ease: 'power3.inOut', clearProps: 'clipPath', scrollTrigger: { trigger: '.maison-photo', start: 'top 90%', once: true } });
-  gsap.from('.maison-photo figcaption', { opacity: 0, y: 10, duration: 0.7, delay: 0.5, ease: 'power2.out', scrollTrigger: { trigger: '.maison-photo', start: 'top 90%', once: true } });
 }
 
 // un cachet se presse comme un sceau qu'on appose
