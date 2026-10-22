@@ -44,6 +44,16 @@ $('[data-annees-depuis]').textContent = `${annees} ans d'antiquités`;
 if (!calme) {
   const ann = $('[data-annee]'); const c = { v: new Date().getFullYear() };
   let dernier = 0;
+  // largeur fixe : la plus large des annees affichees, pour que rien ne bouge pendant le defilement des chiffres
+  const fixerLargeur = () => {
+    ann.style.minWidth = ''; let max = 0;
+    for (let a = 1969; a <= c.v; a++) { ann.textContent = a; max = Math.max(max, ann.getBoundingClientRect().width); }
+    ann.style.minWidth = `${Math.ceil(max)}px`; ann.textContent = dernier || c.v;
+  };
+  fixerLargeur();
+  ann.textContent = c.v;
+  if (document.fonts) document.fonts.ready.then(fixerLargeur);
+  addEventListener('resize', () => { clearTimeout(ann._t); ann._t = setTimeout(fixerLargeur, 300); });
   const compter = (duree = 2.4) => { c.v = new Date().getFullYear(); gsap.to(c, { v: 1969, duration: duree, ease: 'power3.out', overwrite: true, onUpdate: () => { const v = Math.round(c.v); if (v !== dernier) { dernier = v; ann.textContent = v; if (PB.son.actif && v % 5 === 0) PB.son.tic(0.18, v % 10 === 0); } } }); };
   ScrollTrigger.create({ trigger: '.maison', start: 'top 70%', once: true, onEnter: () => compter() });
   const zoneAnnee = $('.maison-annees');
@@ -124,12 +134,12 @@ function animerSalle() {
   let retour = null;
   const st = ScrollTrigger.create({
     trigger: sec, start: 'top top', end: () => `+=${distance()}`, pin: true, scrub: 0.7, animation: tw, invalidateOnRefresh: true, anticipatePin: 1,
-    onScrubComplete: () => { retour = gsap.to(sec, { '--balan': 0, duration: 2, ease: 'elastic.out(1.1, 0.18)' }); },
+    onScrubComplete: () => { retour = gsap.to(sec, { '--balan': 0, duration: 1.5, ease: 'elastic.out(1.1, 0.22)' }); },
   });
   tw.eventCallback('onUpdate', () => {
     const pr = tw.progress();
     const v = st.getVelocity();
-    if (Math.abs(v) > 30) { retour?.kill(); retour = null; balan(gsap.utils.clamp(-12, 12, -v / 110)); }
+    if (Math.abs(v) > 30) { retour?.kill(); retour = null; balan(gsap.utils.clamp(-8, 8, -v / 140)); }
     hudB.style.transform = `scaleX(${pr})`;
     gsap.set(vit, { xPercent: -18 + pr * 36, opacity: 0.25 + Math.sin(pr * Math.PI * 3) ** 2 * 0.5 });
     const mid = innerWidth / 2; let best = null; let bd = 1e9;

@@ -77,7 +77,11 @@ body::after { content: ""; position: fixed; inset: -50%; z-index: 250; pointer-e
 nav.fil { position: relative; z-index: 2; }
 .dore { padding-bottom: .12em; }
 .dore-mot.dore { background-size: 340px auto, 200% 100%; }
-.dore:not(.dore-mot) { display: inline-block; background-size: 340px auto, 200% 100%; background-position: 60px 0, 0% 0; }
+.dore:not(.dore-mot):not([data-dorure]) { display: inline-block; }
+.dore:not(.dore-mot) { background-size: 340px auto, 200% 100%; background-position: 60px 0, 0% 0; }
+/* titres dores : invisibles le temps que le script les decoupe en mots (au plus 3 s si le script manque) */
+[data-dorure]:not([data-dor-ok]) { visibility: hidden; animation: titre-secours 0s 3s forwards; }
+@keyframes titre-secours { to { visibility: visible; } }
 
 /* ---------- mise en page ---------- */
 .contenu { width: 100%; max-width: 1360px; margin: 0 auto; padding: 0 var(--gouttiere); }
@@ -270,9 +274,9 @@ html.intro::before { content: ""; position: fixed; inset: 0; z-index: 294; backg
 .entree-piece .etiquette { position: absolute; z-index: 2; left: 84%; top: 79%; right: auto; bottom: auto; }
 
 /* ---------- la maison ---------- */
-.maison-grille { display: grid; grid-template-columns: .7fr 1.2fr 1fr; gap: clamp(30px, 5vw, 80px); align-items: center; }
+.maison-grille { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(30px, 5vw, 80px); align-items: center; }
 .maison-annees { display: grid; justify-items: start; gap: 6px; cursor: default; -webkit-tap-highlight-color: transparent; }
-.maison-annees .annee { font-size: clamp(4.5rem, 10vw, 9.5rem); line-height: .9; color: var(--or-clair); font-style: italic; }
+.maison-annees .annee { font-size: clamp(4.5rem, 10vw, 9.5rem); line-height: .9; color: var(--or-clair); font-style: italic; white-space: nowrap; font-variant-numeric: tabular-nums; display: inline-block; }
 .maison-texte .titre-section { margin-bottom: 26px; font-size: clamp(2rem, 3.6vw, 3.4rem); }
 .maison-photo { position: relative; }
 .maison-photo .cadre-photo { position: relative; display: block; overflow: hidden; }
@@ -735,7 +739,7 @@ html.attente main { opacity: 0; animation: montrer 0s 2.5s forwards; }
   .nav { gap: 16px; }
   .outil .lib { display: none; }
   .cachets { grid-template-columns: repeat(3, 1fr); row-gap: 40px; }
-  .maison-grille { grid-template-columns: 1fr 1fr; }
+  .maison-grille { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .maison-annees { grid-column: 1 / -1; grid-auto-flow: column; justify-content: start; align-items: baseline; gap: 14px; }
 }
 @media (max-width: 960px) {
