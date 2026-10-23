@@ -33,7 +33,7 @@ export function etiquette(o, { prix = true } = {}) {
 
 export function boutonSelection(o, cls = 'ajout') {
   if (!PB.enVente(o)) return `<a class="${cls} ajout--info" href="${PB.lien(o)}#demande">${PB.ICO.fleche}<span>Se renseigner</span></a>`;
-  return `<button class="${cls}" type="button" data-selection="${o.id}" aria-pressed="false" aria-label="Ajouter ${e(o.titre)} à ma sélection">${PB.ICO.plus}<span>Sélection</span></button>`;
+  return `<button class="${cls}" type="button" data-selection="${o.id}" aria-pressed="false" aria-label="Ajouter à ma sélection : ${e(o.titre)}">${PB.ICO.plus}<span>Sélection</span></button>`;
 }
 
 /* piece de la salle horizontale : hauteur proportionnelle a la taille reelle, dans des bornes lisibles */

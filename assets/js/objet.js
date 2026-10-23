@@ -258,7 +258,7 @@ addEventListener('resize', () => { clearTimeout(minuterieEchelle); minuterieEche
 /* ---------- barre d'action en bas de l'ecran (telephone) ---------- */
 if (PB.etroit()) {
   const barre = document.createElement('div');
-  barre.className = 'barre-action'; barre.setAttribute('aria-label', 'Actions sur la pièce');
+  barre.className = 'barre-action'; barre.setAttribute('role', 'region'); barre.setAttribute('aria-label', 'Actions sur la pièce');
   barre.innerHTML = `<a class="bouton bouton--or" href="#demande"><span>${vente ? 'Demander le prix' : 'Se renseigner'}</span></a><a class="bouton bouton--icone" href="tel:+33387636161" aria-label="Appeler la boutique de Metz"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.2 2.8l2.6 2.9-1.4 2.2c.9 1.9 2.4 3.4 4.3 4.3l2.2-1.4 2.9 2.6-1.3 2.6c-6.3-.4-11.1-5.2-11.5-11.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>`;
   document.body.append(barre);
   const vus = new Map();

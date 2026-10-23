@@ -1,8 +1,8 @@
 /* Pierre Becq, antiquaire a Metz — direction « Lanterne de Metz » : laque noire, vieil or, lumiere de bougie, eclats de vitrail. */
-@font-face { font-family: "Bodoni Moda"; src: url("../fonts/bodoni-moda.woff") format("woff"); font-weight: 400 900; font-style: normal; font-display: swap; }
-@font-face { font-family: "Bodoni Moda"; src: url("../fonts/bodoni-moda-italic.woff") format("woff"); font-weight: 400 900; font-style: italic; font-display: swap; }
-@font-face { font-family: "Jost"; src: url("../fonts/jost.woff") format("woff"); font-weight: 100 900; font-style: normal; font-display: swap; }
-@font-face { font-family: "Jost"; src: url("../fonts/jost-italic.woff") format("woff"); font-weight: 100 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "Bodoni Moda"; src: url("../fonts/bodoni-moda.woff2") format("woff2"); font-weight: 400 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Bodoni Moda"; src: url("../fonts/bodoni-moda-italic.woff2") format("woff2"); font-weight: 400 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "Jost"; src: url("../fonts/jost.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Jost"; src: url("../fonts/jost-italic.woff2") format("woff2"); font-weight: 100 900; font-style: italic; font-display: swap; }
 
 :root {
   color-scheme: dark;
@@ -194,7 +194,7 @@ p, li, dd { text-wrap: pretty; }
 .ligne-sel { display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
 .ligne-sel img { width: 64px; height: 64px; object-fit: contain; background: var(--laque-2); }
 .ligne-sel .t { font-family: var(--f-display); font-style: italic; font-size: 1.08rem; line-height: 1.2; }
-.ligne-sel button { font-size: var(--t-xs); color: var(--ivoire-3); text-decoration: underline; text-underline-offset: 3px; min-height: 36px; }
+.ligne-sel button { font-size: var(--t-xs); color: var(--ivoire-3); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; }
 .tiroir .vide { padding: 40px 0; display: grid; gap: 14px; justify-items: start; }
 
 /* notifications */
@@ -541,7 +541,7 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .choix legend { width: 100%; margin-bottom: 10px; }
 .choix label { position: relative; }
 .choix input { position: absolute; opacity: 0; inset: 0; }
-.choix span { display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; border: 1px solid var(--laque-4); font-size: var(--t-s); color: var(--ivoire-2); transition: all .3s; cursor: pointer; }
+.choix span { display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; border: 1px solid #6b5a45; font-size: var(--t-s); color: var(--ivoire-2); transition: all .3s; cursor: pointer; }
 .choix input:checked + span { border-color: var(--or); color: var(--laque-0); background: var(--or-degrade); background-size: 200% 100%; }
 .choix input:focus-visible + span { outline: 2px solid var(--or-clair); outline-offset: 2px; }
 .choix--cartes { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
@@ -605,7 +605,7 @@ html.calme .grand-nom .nom-lueur { display: none; }
 .filtres .sep { width: 1px; height: 22px; background: var(--laque-4); margin: 0 4px; }
 .filtres [data-nb] { margin-left: auto; margin-right: 6px; }
 @media (min-width: 701px) { .filtres .sep-2 { display: none; } }
-.filtre { min-height: 36px; padding: 0 14px; border: 1px solid var(--laque-4); border-radius: 999px; font-size: var(--t-xs); letter-spacing: .06em; color: var(--ivoire-2); transition: background-color .3s, color .3s, border-color .3s; white-space: nowrap; }
+.filtre { min-height: 36px; padding: 0 14px; border: 1px solid #6b5a45; border-radius: 999px; font-size: var(--t-xs); letter-spacing: .06em; color: var(--ivoire-2); transition: background-color .3s, color .3s, border-color .3s; white-space: nowrap; }
 .filtre:hover { border-color: var(--or-sombre); color: var(--ivoire); }
 .filtre[aria-pressed="true"] { background: var(--or); border-color: var(--or); color: var(--laque-0); }
 .filtre small { opacity: .7; margin-left: 4px; }
@@ -947,3 +947,10 @@ html.calme .salle-piste-zone { padding-bottom: 10px; }
   .sur-titre { break-after: avoid; }
   .vues { padding-top: 0 !important; }
 }
+
+/* audit : verrou de défilement (aussi en mode calme), cibles tactiles, contours des puces, longueur de ligne */
+html.verrou { overflow: hidden; overscroll-behavior: none; }
+@media (pointer: coarse) {
+  .choix span, .filtre { min-height: 44px; }
+}
+.page-simple p, .pied .note { max-width: 68ch; }

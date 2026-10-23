@@ -69,6 +69,8 @@ entree.addEventListener('change', () => {
 apercus.addEventListener('click', (ev) => { const b = ev.target.closest('[data-oter]'); if (!b) return; const [x] = fichiers.splice(Number(b.dataset.oter), 1); URL.revokeObjectURL(x.url); afficher(); });
 f.addEventListener('submit', (ev) => {
   ev.preventDefault();
+  // Entrée dans un champ des premières étapes : on passe à l'étape suivante au lieu d'envoyer
+  if (n < etapes.length - 1) { $('[data-suiv]', f).click(); return; }
   if (PB.verifierChamps([...f.querySelectorAll('[data-etape="4"] [required]')], err, 'Merci d’indiquer votre nom et votre e-mail.')) return;
   PB.confirmer(f, `<h3>Demande d’expertise notée</h3><p>Merci${$('#e-nom').value ? `, ${PB.esc($('#e-nom').value.trim())}` : ''}. Nous revenons vers vous pour fixer la suite : examen des photos, rendez-vous en boutique à Metz ou autre rendez-vous à convenir.</p><p class="mini">Maquette : rien n’a été envoyé, et vos ${fichiers.length} ${fichiers.length > 1 ? 'photos sont restées' : 'photo est restée'} sur votre appareil.</p>`);
 });

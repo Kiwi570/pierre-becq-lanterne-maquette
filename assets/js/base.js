@@ -119,7 +119,7 @@ function monterChrome() {
   const entete = document.createElement('header');
   entete.className = 'entete';
   entete.innerHTML = `
-    <a class="marque" href="index.html" aria-label="Pierre Becq Antiquaire, accueil">${PB.monoSVG()}<span class="nom-marque"><strong>Pierre Becq</strong><small>Antiquaire</small></span></a>
+    <a class="marque" href="index.html" aria-label="Pierre Becq Antiquaire, accueil">${PB.monoSVG()}<span class="nom-marque"><strong>Pierre Becq</strong> <small>Antiquaire</small></span></a>
     <nav class="nav" aria-label="Navigation principale">
       <a href="galerie.html"${cur('galerie') || cur('objet')}>La galerie</a>
       <a href="expertise.html"${cur('expertise')}>L'expertise</a>
@@ -130,7 +130,7 @@ function monterChrome() {
     <div class="outils">
       <button class="outil" type="button" data-son aria-pressed="false" title="Son de pendule">${ICO.balancier}<span class="lib">Son</span><span class="sr">Activer le son de pendule</span></button>
       <button class="outil" type="button" data-calme aria-pressed="${calme}" title="Réduire les animations">${ICO.calme}<span class="lib">Mode calme</span></button>
-      <button class="outil" type="button" data-selection-ouvrir aria-label="Ouvrir ma sélection">${ICO.etiquette}<span class="lib">Sélection</span><span class="pastille chiffres" data-compte-sel>0</span></button>
+      <button class="outil" type="button" data-selection-ouvrir aria-label="Sélection 0, ouvrir">${ICO.etiquette}<span class="lib">Sélection</span> <span class="pastille chiffres" data-compte-sel>0</span></button>
       <button class="outil menu-bouton" type="button" data-menu aria-expanded="false" aria-controls="menu-plein" aria-label="Ouvrir le menu">${ICO.menu}</button>
     </div>`;
   document.body.prepend(entete);
@@ -139,7 +139,7 @@ function monterChrome() {
   document.body.prepend(evite);
 
   const menu = document.createElement('div');
-  menu.className = 'menu-plein'; menu.id = 'menu-plein'; menu.inert = true;
+  menu.className = 'menu-plein'; menu.id = 'menu-plein'; menu.inert = true; menu.setAttribute('data-lenis-prevent', '');
   menu.setAttribute('role', 'dialog'); menu.setAttribute('aria-modal', 'true'); menu.setAttribute('aria-label', 'Menu');
   menu.innerHTML = `
     <button class="outil fermer" type="button" data-menu-fermer aria-label="Fermer le menu">${ICO.croix}</button>
@@ -160,7 +160,7 @@ function monterChrome() {
 
   const voile = document.createElement('div'); voile.className = 'voile'; voile.dataset.voile = '';
   const tiroir = document.createElement('div');
-  tiroir.className = 'tiroir'; tiroir.setAttribute('role', 'dialog'); tiroir.setAttribute('aria-modal', 'true'); tiroir.setAttribute('aria-label', 'Ma sélection'); tiroir.setAttribute('aria-hidden', 'true'); tiroir.inert = true;
+  tiroir.className = 'tiroir'; tiroir.setAttribute('data-lenis-prevent', ''); tiroir.setAttribute('role', 'dialog'); tiroir.setAttribute('aria-modal', 'true'); tiroir.setAttribute('aria-label', 'Ma sélection'); tiroir.setAttribute('aria-hidden', 'true'); tiroir.inert = true;
   tiroir.innerHTML = `
     <header><h2>Ma sélection</h2><button class="outil" type="button" data-selection-fermer aria-label="Fermer ma sélection">${ICO.croix}</button></header>
     <div class="liste" data-selection-liste></div>
@@ -191,6 +191,7 @@ function monterChrome() {
     btnMenu.setAttribute('aria-expanded', String(on));
     PB.isoler(menu, on);
     menu.inert = !on;
+    document.documentElement.classList.toggle('verrou', on);
     if (on) {
       PB.lenis?.stop(); menu.querySelector('a').focus();
       if (!calme) gsap.fromTo(menu.querySelectorAll(':scope > a, .sep, .menu-pied'), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.05, overwrite: true });
@@ -486,8 +487,8 @@ const Selection = {
     b.setAttribute('aria-pressed', String(dedans));
     if (b.classList.contains('ajout')) {
       b.innerHTML = `${dedans ? ICO.ok : ICO.plus}<span>${dedans ? 'Dans ma sélection' : 'Sélection'}</span>`;
-      b.setAttribute('aria-label', dedans ? `${o?.titre} est dans votre sélection, la retirer` : `Ajouter ${o?.titre} à ma sélection`);
-    } else if (b.querySelector('span')) { b.querySelector('span').textContent = dedans ? 'Dans ma sélection' : 'Ajouter à ma sélection'; b.setAttribute('aria-label', dedans ? `${o?.titre} est dans votre sélection, la retirer` : `Ajouter ${o?.titre} à ma sélection`); }
+      b.setAttribute('aria-label', dedans ? `Dans ma sélection : ${o?.titre}, la retirer` : `Ajouter à ma sélection : ${o?.titre}`);
+    } else if (b.querySelector('span')) { b.querySelector('span').textContent = dedans ? 'Dans ma sélection' : 'Ajouter à ma sélection'; b.setAttribute('aria-label', dedans ? `Dans ma sélection : ${o?.titre}, la retirer` : `Ajouter à ma sélection : ${o?.titre}`); }
   },
   vol(depuis) {
     if (calme || !depuis) return;
@@ -510,7 +511,7 @@ const Selection = {
     this.retour = document.activeElement;
     p.classList.add('ouvert'); p.setAttribute('aria-hidden', 'false'); p.inert = false;
     document.querySelector('[data-voile]').classList.add('on');
-    PB.lenis?.stop(); PB.isoler(p, true);
+    PB.lenis?.stop(); PB.isoler(p, true); document.documentElement.classList.add('verrou');
     setTimeout(() => document.querySelector('[data-selection-fermer]').focus(), 250);
   },
   fermer() {
@@ -518,12 +519,12 @@ const Selection = {
     if (!p.classList.contains('ouvert')) return;
     p.classList.remove('ouvert'); p.setAttribute('aria-hidden', 'true'); p.inert = true;
     document.querySelector('[data-voile]').classList.remove('on');
-    PB.isoler(p, false); PB.lenis?.start();
+    PB.isoler(p, false); PB.lenis?.start(); document.documentElement.classList.remove('verrou');
     if (this.retour && document.contains(this.retour)) this.retour.focus();
   },
   rendre() {
     const n = this.ids.length;
-    const p = document.querySelector('[data-compte-sel]'); if (p) { p.textContent = n; p.classList.toggle('on', n > 0); }
+    const p = document.querySelector('[data-compte-sel]'); if (p) { p.textContent = n; p.classList.toggle('on', n > 0); p.closest('button')?.setAttribute('aria-label', `Sélection ${n}, ouvrir`); }
     const pm = document.querySelector('[data-compte-sel-menu]'); if (pm) pm.textContent = n;
     const liste = document.querySelector('[data-selection-liste]'); const pied = document.querySelector('[data-selection-pied]');
     if (!liste) return;
@@ -745,7 +746,8 @@ function memoirePosition() {
   addEventListener('pagehide', () => { try { sessionStorage.setItem(cle, String(Math.round(scrollY))); } catch (e) { /* stockage indisponible */ } });
   const nav = performance.getEntriesByType?.('navigation')[0];
   let y = 0; try { y = Number(sessionStorage.getItem(cle)); } catch (e) { y = 0; }
-  if (!nav || nav.type !== 'back_forward' || !y || location.hash) return;
+  // retour arrière et rechargement (y compris celui du passage bureau / téléphone) : on retrouve sa position
+  if (!nav || (nav.type !== 'back_forward' && nav.type !== 'reload') || !y || location.hash) return;
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   PB.pret.then(() => setTimeout(() => {
     ScrollTrigger.refresh();
