@@ -1,6 +1,6 @@
 /* Pierre Becq — socle commun : en-tete, defilement, curseur flamme, dorure, son de pendule, selection, transitions, ouverture. */
 import { Lenis } from '../vendor/lenis.mjs';
-import { NOM, PB as MONO } from './formes.js?v=20261028';
+import { NOM, PB as MONO } from './formes.js?v=20261028-2';
 
 const gsap = window.gsap;
 const ScrollTrigger = window.ScrollTrigger;
@@ -465,6 +465,28 @@ PB.toast = (msg) => {
   const t = document.querySelector('.toast');
   t.textContent = msg; t.classList.add('on');
   clearTimeout(minuterieToast); minuterieToast = setTimeout(() => t.classList.remove('on'), 3400);
+};
+
+/* ---------- barre d'action en bas de l'ecran (telephone) ----------
+   cachee tant qu'un des blocs `caches` est a l'ecran (test(entree) dit quand) ; --barre-bas = hauteur mesuree */
+PB.barreAction = (html, etiquette, caches) => {
+  const barre = document.createElement('div');
+  barre.className = 'barre-action'; barre.setAttribute('role', 'region'); barre.setAttribute('aria-label', etiquette);
+  barre.innerHTML = html;
+  document.body.append(barre);
+  const vus = new Map();
+  const maj = () => {
+    const cacher = [...vus.values()].some(Boolean);
+    barre.classList.toggle('on', !cacher); barre.inert = cacher;
+    document.documentElement.style.setProperty('--barre-bas', cacher ? '0px' : `${barre.offsetHeight}px`);
+  };
+  caches.forEach(([el, test = (en) => en.isIntersecting]) => {
+    if (!el) return;
+    vus.set(el, true);
+    new IntersectionObserver((es) => { es.forEach((en) => vus.set(el, test(en))); maj(); }, { threshold: [0, 0.5, 1] }).observe(el);
+  });
+  new ResizeObserver(maj).observe(barre);
+  return barre;
 };
 
 /* ---------- ma selection ---------- */

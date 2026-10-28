@@ -134,11 +134,11 @@ p, li, dd { text-wrap: pretty; }
 .entete.est-plein::after { opacity: 0; }
 .entete.est-plein { box-shadow: inset 0 -1px 0 rgba(201,163,91,.18); }
 .entete.est-cache { transform: translateY(-100%); }
-.marque { display: flex; align-items: center; gap: 12px; flex: none; }
+.marque { display: flex; align-items: center; gap: 12px; flex: none; min-height: 44px; }
 .marque .mono { width: 40px; height: 40px; }
 .marque .nom-marque { display: grid; line-height: 1.05; }
 .marque .nom-marque strong { font-family: var(--f-display); font-style: italic; font-weight: 400; font-size: 1.32rem; letter-spacing: .01em; }
-.marque .nom-marque small { font-size: .62rem; letter-spacing: .32em; text-transform: uppercase; color: var(--or); }
+.marque .nom-marque small { font-size: max(12px, .62rem); letter-spacing: .24em; text-transform: uppercase; color: var(--or); }
 .mono circle { fill: none; stroke: var(--or); stroke-width: 1.3; }
 .mono path { fill: var(--or-clair); }
 .nav { display: flex; gap: clamp(16px, 2.2vw, 34px); font-size: var(--t-xs); letter-spacing: .18em; text-transform: uppercase; }
@@ -269,7 +269,7 @@ html.intro::before { content: ""; position: fixed; inset: 0; z-index: 294; backg
 .etiquette { position: relative; display: grid; gap: 1px; justify-items: start; width: max-content; max-width: 230px; margin-top: 18px; padding: 12px 16px 12px 26px; background: #e9dcc2; color: #2a2018; font-size: var(--t-xs); line-height: 1.4; clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%); transform-origin: 0 50%; box-shadow: 0 10px 20px rgba(0,0,0,.35); }
 .etiquette::before { content: ""; position: absolute; left: 9px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--laque-0); box-shadow: inset 0 0 0 1.5px #b89a6a; }
 .etiquette strong { font-family: var(--f-display); font-style: italic; font-weight: 500; font-size: 1.02rem; color: #1a130d; }
-.etiquette .prix { color: #6e4a1a; letter-spacing: .08em; text-transform: uppercase; font-size: 11px; margin-top: 3px; }
+.etiquette .prix { color: #6e4a1a; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; margin-top: 3px; }
 .etiquette .fil { position: absolute; left: -40px; top: 50%; width: 42px; height: 1px; background: linear-gradient(90deg, transparent, #b89a6a); }
 .entree-piece .etiquette { position: absolute; z-index: 2; left: 84%; top: 79%; right: auto; bottom: auto; }
 
@@ -397,6 +397,16 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .frise.est-epinglee .frise-tete { flex: none; margin-bottom: 6px; }
 .frise.est-epinglee .titre-section { font-size: min(var(--t-2xl), 7.5vh); }
 .frise.est-epinglee .frise-scene { flex: 1; min-height: 0; height: auto; }
+/* petits portables (1000x560) : tete resserree, pieces plus proches de l'axe */
+@media (max-height: 600px) {
+  .frise.est-epinglee { padding-bottom: 8px; }
+  .frise.est-epinglee .sur-titre { margin-bottom: 4px; }
+  .frise.est-epinglee .titre-section { font-size: min(var(--t-2xl), 6.4vh); }
+  .frise.est-epinglee .frise-tete .petit { margin-top: 4px; max-width: none; }
+  .frise.est-epinglee .frise-piece.bas { top: calc(50% + 30px); }
+  .frise.est-epinglee .frise-piece.bas::after { height: 30px; }
+  .frise.est-epinglee .frise-piece { gap: 3px; }
+}
 /* frise verticale (telephone) */
 .frise.est-verticale { overflow: clip; }
 .frise.est-verticale .frise-scene { height: auto; overflow: visible; }
@@ -493,7 +503,7 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .carte-est text { font-family: var(--f-texte); font-size: 10px; letter-spacing: .12em; fill: var(--ivoire-2); text-transform: uppercase; }
 .carte-est text.ville { font-family: var(--f-display); font-style: italic; font-size: 13px; letter-spacing: 0; text-transform: none; fill: var(--ivoire); }
 .carte-est text.voisin { fill: var(--ivoire-3); font-size: 9px; }
-.carte-est text.ville-2 { font-family: var(--f-display); font-style: italic; font-size: 11px; letter-spacing: 0; text-transform: none; fill: var(--ivoire-2); }
+.carte-est text.ville-2 { font-family: var(--f-display); font-style: italic; font-size: 12px; letter-spacing: 0; text-transform: none; fill: var(--ivoire-2); }
 
 /* ---------- boutiques ---------- */
 .boutiques-grille { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(20px, 3vw, 40px); }
@@ -510,7 +520,7 @@ img.vp { width: var(--w); height: auto; max-width: none; }
 .boutiques-grille { grid-template-columns: 1.45fr 1fr; align-items: start; }
 .boutique--a-confirmer { background: transparent; border-style: dashed; }
 .boutique--a-confirmer figure img { aspect-ratio: 16 / 9; opacity: .7; }
-.badge-confirmer { justify-self: start; margin: 0; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; padding: 5px 9px; border: 1px dashed rgba(213,141,46,.7); color: var(--ambre); }
+.badge-confirmer { justify-self: start; margin: 0; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; padding: 5px 9px; border: 1px dashed rgba(213,141,46,.7); color: var(--ambre); }
 .note-titres { max-width: 58ch; margin-top: 22px; color: var(--ivoire-3); }
 .etat-ouvert { display: flex; align-items: center; gap: 10px; font-size: var(--t-s); color: var(--ivoire-2); }
 .etat-ouvert i { width: 9px; height: 9px; border-radius: 50%; background: var(--ivoire-3); }
@@ -625,10 +635,10 @@ html.calme .grand-nom .nom-lueur { display: none; }
 .carte-texte .t { font-family: var(--f-display); font-style: italic; font-size: 1.22rem; line-height: 1.2; }
 .carte-texte .e { font-size: var(--t-xs); color: var(--ivoire-3); }
 .carte-texte .bas { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
-.carte-texte .p { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--or); line-height: 1.4; }
+.carte-texte .p { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--or); line-height: 1.4; }
 .carte .lien-carte { position: absolute; inset: 0; z-index: 1; }
 .carte .ajout { position: relative; z-index: 2; }
-.badge-lorraine { position: absolute; top: 14px; left: 14px; z-index: 2; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; padding: 5px 9px; background: rgba(11,9,8,.7); border: 1px solid rgba(201,163,91,.4); color: var(--or-clair); }
+.badge-lorraine { position: absolute; top: 14px; left: 14px; z-index: 2; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; padding: 5px 9px; background: rgba(11,9,8,.7); border: 1px solid rgba(201,163,91,.4); color: var(--or-clair); }
 .groupe-siecle { margin-bottom: 70px; }
 .groupe-siecle h2 { display: flex; align-items: baseline; gap: 20px; margin-bottom: 26px; font-family: var(--f-display); font-style: italic; font-size: var(--t-2xl); }
 .groupe-siecle h2 small { font-family: var(--f-texte); font-style: normal; font-size: var(--t-xs); letter-spacing: .16em; text-transform: uppercase; color: var(--ivoire-3); }
@@ -871,9 +881,19 @@ html.attente main { opacity: 0; animation: montrer 0s 2.5s forwards; }
   .pied-bas nav, .pied-bas .reseaux { gap: 16px 26px; }
 }
 
-/* barre d'action des fiches sur telephone */
+/* cibles tactiles de 44 px sur telephone : zone agrandie sans changer la ligne de texte */
+@media (max-width: 860px) {
+  .lien { padding: 10px 0 12px; margin: -10px 0; background-origin: content-box; background-position: 0 calc(100% + 2px); }
+  .lien::after { bottom: 10px; }
+  .fil a { display: inline-block; padding: 13px 0; margin: -13px 0; }
+  .carte-est text, .carte-est text.voisin, .carte-est text.ville-2 { font-size: 12px; }
+  .carte-est text.voisin { letter-spacing: .04em; }
+}
+
+/* barre d'action sur telephone (fiches et accueil), cachee sous le menu et les tiroirs */
 .barre-action { position: fixed; left: 0; right: 0; bottom: 0; z-index: 115; display: flex; gap: 10px; padding: 12px var(--gouttiere) calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(11,9,8,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(201,163,91,.2); transform: translateY(110%); transition: transform .5s var(--ease); }
 .barre-action.on { transform: none; }
+html.verrou .barre-action { transform: translateY(110%); }
 .barre-action .bouton--or { flex: 1; }
 .bouton--icone { padding: 0; width: 52px; flex: none; }
 .bouton--icone svg { width: 20px; height: 20px; }

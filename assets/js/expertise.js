@@ -1,7 +1,7 @@
 /* Expertise : la loupe sur le bureau de l'expert, les trois missions, le rapport, le formulaire en quatre etapes. */
-import PB, { demarrer } from './base.js?v=20261028';
-import { fondLoupe } from './lumiere-gl.js?v=20261028';
-import { construireMarqueteries, construireCaisse } from './decors.js?v=20261028';
+import PB, { demarrer } from './base.js?v=20261028-2';
+import { fondLoupe } from './lumiere-gl.js?v=20261028-2';
+import { construireMarqueteries, construireCaisse } from './decors.js?v=20261028-2';
 
 demarrer();
 const { gsap, ScrollTrigger, calme } = PB;

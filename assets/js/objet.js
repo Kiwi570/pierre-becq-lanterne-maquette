@@ -1,7 +1,7 @@
 /* Fiche d'une piece : sortie de l'ombre, vues a la loupe d'expert, description, vue a l'echelle, demande de prix. */
-import PB, { demarrer } from './base.js?v=20261028';
-import { fondLanterne } from './lumiere-gl.js?v=20261028';
-import { visuelPiece, carteGalerie, boutonSelection } from './cartes.js?v=20261028';
+import PB, { demarrer } from './base.js?v=20261028-2';
+import { fondLanterne } from './lumiere-gl.js?v=20261028-2';
+import { visuelPiece, carteGalerie, boutonSelection } from './cartes.js?v=20261028-2';
 
 demarrer();
 const { gsap, ScrollTrigger, calme } = PB;
@@ -257,15 +257,10 @@ addEventListener('resize', () => { clearTimeout(minuterieEchelle); minuterieEche
 
 /* ---------- barre d'action en bas de l'ecran (telephone) ---------- */
 if (PB.etroit()) {
-  const barre = document.createElement('div');
-  barre.className = 'barre-action'; barre.setAttribute('role', 'region'); barre.setAttribute('aria-label', 'Actions sur la pièce');
-  barre.innerHTML = `<a class="bouton bouton--or" href="#demande"><span>${vente ? 'Demander le prix' : 'Se renseigner'}</span></a><a class="bouton bouton--icone" href="tel:+33387636161" aria-label="Appeler la boutique de Metz"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.2 2.8l2.6 2.9-1.4 2.2c.9 1.9 2.4 3.4 4.3 4.3l2.2-1.4 2.9 2.6-1.3 2.6c-6.3-.4-11.1-5.2-11.5-11.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>`;
-  document.body.append(barre);
-  const vus = new Map();
-  const maj = () => { const cacher = [...vus.values()].some(Boolean); barre.classList.toggle('on', !cacher); document.documentElement.style.setProperty('--barre-bas', cacher ? '0px' : '76px'); };
-  // la barre reste visible tant que les boutons de la fiche ne sont pas entierement a l'ecran
-  const io = new IntersectionObserver((es) => { es.forEach((en) => vus.set(en.target, en.target.id === 'demande' ? en.isIntersecting : en.intersectionRatio > 0.98)); maj(); }, { threshold: [0, 0.5, 1] });
-  [$('[data-actions]'), $('#demande')].forEach((el) => io.observe(el));
+  // la barre reste visible tant que les boutons de la fiche ne sont pas entierement a l'ecran, cachee sur la demande et le pied
+  PB.barreAction(`<a class="bouton bouton--or" href="#demande"><span>${vente ? 'Demander le prix' : 'Se renseigner'}</span></a><a class="bouton bouton--icone" href="tel:+33387636161" aria-label="Appeler la boutique de Metz"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.2 2.8l2.6 2.9-1.4 2.2c.9 1.9 2.4 3.4 4.3 4.3l2.2-1.4 2.9 2.6-1.3 2.6c-6.3-.4-11.1-5.2-11.5-11.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>`, 'Actions sur la pièce', [
+    [$('[data-actions]'), (en) => en.intersectionRatio > 0.98], [$('#demande')], [$('.pied')],
+  ]);
 }
 
 /* ---------- demande ---------- */

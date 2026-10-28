@@ -1,9 +1,9 @@
 /* Accueil : flamme sur la boiserie, la maison, la salle des coups de coeur, la frise des siecles, la Lorraine, l'expertise. */
-import PB, { demarrer } from './base.js?v=20261028';
-import { fondLanterne } from './lumiere-gl.js?v=20261028';
-import { FRANCE } from './formes.js?v=20261028';
-import { pieceSalle, visuelPiece, hauteurRelative, largeurPiece, hauteurPourLargeur } from './cartes.js?v=20261028';
-import { construireMarqueteries, construireCaisse } from './decors.js?v=20261028';
+import PB, { demarrer } from './base.js?v=20261028-2';
+import { fondLanterne } from './lumiere-gl.js?v=20261028-2';
+import { FRANCE } from './formes.js?v=20261028-2';
+import { pieceSalle, visuelPiece, hauteurRelative, largeurPiece, hauteurPourLargeur } from './cartes.js?v=20261028-2';
+import { construireMarqueteries, construireCaisse } from './decors.js?v=20261028-2';
 
 demarrer();
 const { gsap, ScrollTrigger, calme } = PB;
@@ -143,7 +143,7 @@ function animerSalle() {
   const balan = gsap.quickTo(sec, '--balan', { duration: 0.5, ease: 'power2' });
   let retour = null;
   const st = ScrollTrigger.create({
-    trigger: sec, start: 'top top', end: () => `+=${distance()}`, pin: true, scrub: 0.7, animation: tw, invalidateOnRefresh: true, anticipatePin: 1,
+    trigger: sec, start: 'top top', end: () => `+=${distance()}`, pin: true, scrub: 0.7, animation: tw, invalidateOnRefresh: true,
     onScrubComplete: () => { retour = gsap.to(sec, { '--balan': 0, duration: 1.5, ease: 'elastic.out(1.1, 0.22)' }); },
   });
   tw.eventCallback('onUpdate', () => {
@@ -217,7 +217,7 @@ function construireFrise() {
   $('.frise-tete').append(anneeEl0);
   if (bureau()) $('#frise').classList.add('est-epinglee');
   else $('.frise-tete').insertAdjacentHTML('beforeend', '<p class="mini indice-glisser" aria-hidden="true">Faites glisser la frise →</p>');
-  const Hh = bureau() ? Math.max(80, Math.min(240, scene.clientHeight / 2 - 128)) : 130;
+  const Hh = bureau() ? Math.max(innerHeight <= 600 ? 56 : 80, Math.min(240, scene.clientHeight / 2 - 128)) : 130; // pieces plus petites sur les ecrans bas
   triees.forEach((x, i) => {
     const pos = i % 2 ? 'bas' : 'haut';
     html += `<a class="frise-piece ${pos}" href="${PB.lien(x)}" data-carte data-annee="${x.annee}" style="left:${X(x.annee)}px" aria-label="${PB.esc(x.titre)}, ${PB.esc(x.epoque)}">
@@ -246,7 +246,7 @@ function construireFrise() {
   const dist = () => largeur - innerWidth;
   const tw = gsap.to(pisteF, { x: () => -dist(), ease: 'none' });
   const st = ScrollTrigger.create({
-    trigger: '#frise', start: 'top top', end: () => `+=${dist()}`, pin: true, scrub: 0.8, animation: tw, invalidateOnRefresh: true, anticipatePin: 1,
+    trigger: '#frise', start: 'top top', end: () => `+=${dist()}`, pin: true, scrub: 0.8, animation: tw, invalidateOnRefresh: true,
   });
   const piecesF = $$('.frise-piece', pisteF).map((p) => [p, parseFloat(p.style.left)]);
   let active = null;
@@ -342,7 +342,7 @@ function construireLorraine() {
 function construireCarte() {
   const z = $('[data-carte-est]');
   const P = FRANCE.pts;
-  const vb = [628, 110, 304, 214];
+  const vb = [628, 110, PB.etroit() ? 322 : 304, 214]; // un peu plus large sur telephone : « Allemagne » en 12 px tient dans le cadre
   const lbl = (pt, t, cls, dx = 10, dy = -8, ancre = 'start') => `<text class="${cls}" x="${pt[0] + dx}" y="${pt[1] + dy}" text-anchor="${ancre}">${t}</text>`;
   z.innerHTML = `<svg viewBox="${vb.join(' ')}" role="img" aria-label="Carte du nord-est de la France : la boutique de Metz, Nancy et le Luxembourg, près des frontières de l'Allemagne et de la Belgique">
     <path class="pays" d="${FRANCE.d}"/>
@@ -400,6 +400,8 @@ construireContact();
 PB.dorer();
 PB.balancer();
 PB.aimants();
+// barre d'action sur telephone : apres l'ouverture, cachee sur le contact et le pied
+if (PB.etroit()) PB.barreAction(`<a class="bouton bouton--or" href="expertise.html"><span>Faire expertiser</span></a><a class="bouton bouton--icone" href="tel:+33387636161" aria-label="Appeler la boutique de Metz"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.2 2.8l2.6 2.9-1.4 2.2c.9 1.9 2.4 3.4 4.3 4.3l2.2-1.4 2.9 2.6-1.3 2.6c-6.3-.4-11.1-5.2-11.5-11.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>`, 'Actions rapides', [[$('#haut')], [$('#contact')], [$('.pied')]]);
 const lancer = () => { animerSalle(); construireFrise(); ScrollTrigger.sort(); ScrollTrigger.refresh(); };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(lancer); else lancer();
 // passage bureau / telephone : la mise en scene change, la page se recompose

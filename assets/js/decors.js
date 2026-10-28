@@ -1,5 +1,5 @@
 /* Decors communs : marqueterie a cubes, caisse de transport qui s'assemble. */
-import PB from './base.js?v=20261028';
+import PB from './base.js?v=20261028-2';
 
 const { gsap, calme } = PB;
 const $ = (s, r = document) => r.querySelector(s);
