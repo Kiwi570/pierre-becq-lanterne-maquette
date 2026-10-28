@@ -1,9 +1,9 @@
 /* Accueil : flamme sur la boiserie, la maison, la salle des coups de coeur, la frise des siecles, la Lorraine, l'expertise. */
-import PB, { demarrer } from './base.js';
-import { fondLanterne } from './lumiere-gl.js';
-import { FRANCE } from './formes.js';
-import { pieceSalle, visuelPiece, hauteurRelative, largeurPiece, hauteurPourLargeur } from './cartes.js';
-import { construireMarqueteries, construireCaisse } from './decors.js';
+import PB, { demarrer } from './base.js?v=20261028';
+import { fondLanterne } from './lumiere-gl.js?v=20261028';
+import { FRANCE } from './formes.js?v=20261028';
+import { pieceSalle, visuelPiece, hauteurRelative, largeurPiece, hauteurPourLargeur } from './cartes.js?v=20261028';
+import { construireMarqueteries, construireCaisse } from './decors.js?v=20261028';
 
 demarrer();
 const { gsap, ScrollTrigger, calme } = PB;

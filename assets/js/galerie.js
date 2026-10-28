@@ -1,6 +1,6 @@
 /* Galerie : filtres par famille et par siecle, vitrine sur velours ou classement par siecle. */
-import PB, { demarrer } from './base.js';
-import { carteGalerie } from './cartes.js';
+import PB, { demarrer } from './base.js?v=20261028';
+import { carteGalerie } from './cartes.js?v=20261028';
 
 demarrer();
 const { gsap, ScrollTrigger, calme } = PB;

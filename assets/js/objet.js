@@ -1,7 +1,7 @@
 /* Fiche d'une piece : sortie de l'ombre, vues a la loupe d'expert, description, vue a l'echelle, demande de prix. */
-import PB, { demarrer } from './base.js';
-import { fondLanterne } from './lumiere-gl.js';
-import { visuelPiece, carteGalerie, boutonSelection } from './cartes.js';
+import PB, { demarrer } from './base.js?v=20261028';
+import { fondLanterne } from './lumiere-gl.js?v=20261028';
+import { visuelPiece, carteGalerie, boutonSelection } from './cartes.js?v=20261028';
 
 demarrer();
 const { gsap, ScrollTrigger, calme } = PB;

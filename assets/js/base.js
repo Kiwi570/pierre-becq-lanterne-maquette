@@ -1,6 +1,6 @@
 /* Pierre Becq — socle commun : en-tete, defilement, curseur flamme, dorure, son de pendule, selection, transitions, ouverture. */
 import { Lenis } from '../vendor/lenis.mjs';
-import { NOM, PB as MONO } from './formes.js';
+import { NOM, PB as MONO } from './formes.js?v=20261028';
 
 const gsap = window.gsap;
 const ScrollTrigger = window.ScrollTrigger;

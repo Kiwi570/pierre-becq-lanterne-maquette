@@ -1,5 +1,5 @@
 /* Cartes et visuels des pieces : piece detouree sur lumiere, ou photo dans un cadre dore. */
-import PB from './base.js';
+import PB from './base.js?v=20261028';
 
 const e = PB.esc;
 
